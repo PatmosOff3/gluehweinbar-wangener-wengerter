@@ -96,7 +96,7 @@
 
 ## 12. GitHub Pages und Betriebsübergabe
 
-- [ ] 12.1 Einen GitHub-Actions-Workflow für reproduzierbare Installation, Prüfungen, Build und Veröffentlichung ausschließlich des `dist`-Verzeichnisses anlegen und einen erfolgreichen Workflow-Lauf verifizieren.
+- [x] 12.1 Einen GitHub-Actions-Workflow für reproduzierbare Installation, Prüfungen, Build und Veröffentlichung ausschließlich des `dist`-Verzeichnisses anlegen und einen erfolgreichen Workflow-Lauf verifizieren.
 - [ ] 12.2 Die gewählte dauerhafte Subdomain, Vite-Basispfad `/`, CNAME/DNS und erzwungenes HTTPS für GitHub Pages konfigurieren und durch Aufruf der endgültigen HTTPS-Adresse ohne Zertifikats- oder Assetfehler verifizieren.
 - [ ] 12.3 PWA-Installation, Offline-Neustart, Datei-Download und Datei-Upload auf einem echten iPad mit Safari, einem Android-Gerät mit Chrome und einem Laptop/PC verifizieren und Ergebnisse in einer Abnahmecheckliste dokumentieren.
 - [x] 12.4 Eine Bedienungsanleitung für Ersteinrichtung, Kassieren, Pfand, Storno, Produktpflege, Veranstaltungswechsel, getrennte Geräteabrechnung, CSV, Sicherung und Wiederherstellung erstellen und jeden beschriebenen Ablauf am Produktions-Build nachvollziehen.

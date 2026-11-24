@@ -6,6 +6,8 @@ Die Kasse liegt im Repository [PatmosOff3/gluehweinbar-wangener-wengerter](https
 
 Die GitHub-Projektadresse für den Probelauf ist [patmosoff3.github.io/gluehweinbar-wangener-wengerter](https://patmosoff3.github.io/gluehweinbar-wangener-wengerter/). Kasse, Manifest, Icons und Offline-Cache verwenden diesen Unterpfad.
 
+Der [erste erfolgreiche Prüf- und Veröffentlichungslauf](https://github.com/PatmosOff3/gluehweinbar-wangener-wengerter/actions/runs/45470880685) lief am 24. November 2026. Ein frisches Chromium-Profil konnte die veröffentlichte Kasse per HTTPS laden und nach „Offline bereit“ ohne Netz erneut öffnen.
+
 ## Dauerhafte Adresse verbinden
 
 1. Mit der Person, die eure Domain verwaltet, eine freie Subdomain vereinbaren, etwa `kasse.eure-domain.de`. Dies ist ein Beispiel. Den Besitz der Domain nach Möglichkeit zuerst in den GitHub-Kontoeinstellungen verifizieren.
