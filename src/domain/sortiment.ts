@@ -10,7 +10,7 @@ const vorgaben: Vorgabe[] = [
   ['Bier', '0,33 l', 300, false],
   ['Schnaps', '2 cl', 250, false],
   ['Sprudel Classic', '0,5 l', 250, false],
-  ['Apfelsaftschorle', '0,5 l', 250, false],
+  ['Apfelschorle', '0,5 l', 250, false],
 ]
 
 export function standardsortiment(

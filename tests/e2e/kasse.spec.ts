@@ -18,18 +18,36 @@ test('prüft Ersteinrichtung, Zugang, Mengentasten, Rückgeld, Auszahlung und Do
   const rot = taste(page, /^Glühwein rot 0/)
   const weiss = taste(page, /^Glühwein weiß 0/)
   await rot.click()
+  await taste(page, /^− Pfand/).click()
+  await taste(page, 'Bestellung leeren').click()
+  await expect(taste(page, 'Zur Zahlung')).toBeDisabled()
+  await rot.click()
   await rot.click()
   await weiss.click()
   await taste(page, 'Glühwein rot verringern').click()
   await taste(page, 'Glühwein weiß entfernen').click()
-  await expect(page.getByText('5,50 € kassieren')).toBeVisible()
+  await expect(
+    page.locator('.bestellung').getByText('5,50 € kassieren'),
+  ).toBeVisible()
   await taste(page, 'Zur Zahlung').click()
+  await expect(page.locator('.zahlungszusammenfassung')).toContainText(
+    'Glühwein rot',
+  )
+  await expect(taste(page, 'Admin-Bereich')).toHaveCount(0)
+  for (const wert of ['15 €', '30 €', '40 €', '50 €']) {
+    await expect(taste(page, wert)).toBeVisible()
+  }
   await taste(page, '5 €').click()
   await expect(page.getByText(/reicht nicht aus/)).toBeVisible()
   await expect(taste(page, 'Vorgang abschließen')).toBeDisabled()
   await taste(page, '10 €').click()
   await expect(page.getByText('4,50 € Rückgeld')).toBeVisible()
   await taste(page, 'Anderer Betrag').click()
+  await expect(page.getByLabel('Erhaltenes Bargeld (€)')).toBeFocused()
+  await expect(page.getByLabel('Erhaltenes Bargeld (€)')).toHaveAttribute(
+    'inputmode',
+    'decimal',
+  )
   await page.getByLabel('Erhaltenes Bargeld (€)').fill('6,00')
   await expect(page.getByText('0,50 € Rückgeld')).toBeVisible()
   await taste(page, 'Vorgang abschließen').evaluate((button) => {
@@ -37,8 +55,10 @@ test('prüft Ersteinrichtung, Zugang, Mengentasten, Rückgeld, Auszahlung und Do
     ;(button as HTMLButtonElement).click()
   })
   await expect(page.getByText('Vorgang 1 gebucht.')).toBeVisible()
-  await taste(page, 'Pfandrückgabe').click()
-  await expect(page.getByText('2,00 € auszahlen')).toBeVisible()
+  await taste(page, /^− Pfand/).click()
+  await expect(
+    page.locator('.bestellung').getByText('2,00 € auszahlen'),
+  ).toBeVisible()
   await abschliessen(page, '')
   await expect(page.getByText('Vorgang 2 gebucht.')).toBeVisible()
   await taste(page, 'Admin-Bereich').click()
@@ -82,13 +102,14 @@ test('rechnet vier Gläser ab und prüft Offline-CSV, Storno, Sicherung und Wied
   await page.reload()
   await taste(page, /^Glühwein rot 0/).click()
   await taste(page, /^Glühwein weiß 0/).click()
-  const minus = taste(page, '− Pfand / Gefäß vorhanden')
+  const minus = taste(page, /^− Pfand/)
   await minus.click()
   await minus.click()
-  await expect(minus).toBeDisabled()
-  await taste(page, 'Pfandrückgabe').click()
-  await taste(page, 'Pfandrückgabe').click()
-  await expect(page.getByText('3,00 € kassieren')).toBeVisible()
+  await minus.click()
+  await minus.click()
+  await expect(
+    page.locator('.bestellung').getByText('3,00 € kassieren'),
+  ).toBeVisible()
   await abschliessen(page)
   await admin(page)
   const download = page.waitForEvent('download')
@@ -107,11 +128,9 @@ test('rechnet vier Gläser ab und prüft Offline-CSV, Storno, Sicherung und Wied
   const sicherung = page.waitForEvent('download')
   await taste(page, 'Sicherung herunterladen').click()
   const backup = (await (await sicherung).path())!
-  await taste(page, 'Sperren und zur Kasse').click()
   await taste(page, 'Letzten Verkauf stornieren').click()
   await taste(page, 'Storno bestätigen').click()
   await expect(taste(page, 'Letzten Verkauf stornieren')).toHaveCount(0)
-  await admin(page)
   await expect(
     page.locator('dt').filter({ hasText: 'Warenumsatz' }).locator('+ dd'),
   ).toHaveText('0,00 €')
@@ -177,7 +196,7 @@ test('verwendet große erreichbare Tasten und passt die Kasse an den Viewport an
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     await expect(taste(page, 'Zur Zahlung')).toBeInViewport()
     expect(
-      (await taste(page, 'Pfandrückgabe').boundingBox())!.height,
+      (await taste(page, /^− Pfand/).boundingBox())!.height,
     ).toBeGreaterThanOrEqual(48)
   }
   await page.addScriptTag({ content: axe.source })

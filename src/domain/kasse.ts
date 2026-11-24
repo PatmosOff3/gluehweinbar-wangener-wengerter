@@ -109,7 +109,9 @@ export function berechnen(
   }
 }
 
-export const schnellbetraege = [500, 1000, 2000] as const
+export const schnellbetraege = [
+  500, 1000, 1500, 2000, 3000, 4000, 5000,
+] as const
 
 export function barzahlung(summe: Cent, gegeben: Cent) {
   ganz(summe)

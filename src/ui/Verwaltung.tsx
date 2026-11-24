@@ -3,10 +3,12 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../storage/db'
 import {
   neueId,
+  letzterVerkauf,
   pfandSetzen,
   produktSpeichern,
   sortiment,
   statistik,
+  stornieren,
   umbenennen,
   wechseln,
 } from '../application/kasse'
@@ -85,6 +87,7 @@ export function Verwaltung({ aktivId }: { aktivId: string }) {
   const [neu, starten] = useState('')
   const [bestaetigen, fragen] = useState(false)
   const [meldung, melden] = useState('')
+  const [storno, auswahl] = useState<{ id: string; nummer: number }>()
   const aktion = useAktion()
   const daten = useLiveQuery(
     () =>
@@ -95,6 +98,7 @@ export function Verwaltung({ aktivId }: { aktivId: string }) {
         artikel: await sortiment(db, id),
         pfand: (await db.eventSettings.get(id))?.pfand,
         statistik: await statistik(db, id),
+        letzter: await letzterVerkauf(db, id),
       })),
     [id],
   )
@@ -123,6 +127,32 @@ export function Verwaltung({ aktivId }: { aktivId: string }) {
         </select>
       </label>
       <div className="adminraster">
+        {aktiv && daten.letzter && (
+          <section>
+            <h3>Verkauf stornieren</h3>
+            <button onClick={() => auswahl(daten.letzter)}>
+              Letzten Verkauf stornieren
+            </button>
+            {storno && (
+              <div role="group" aria-label="Storno bestätigen">
+                <p>Verkauf {storno.nummer} vollständig stornieren?</p>
+                <button onClick={() => auswahl(undefined)}>Abbrechen</button>
+                <button
+                  disabled={aktion.beschaeftigt}
+                  onClick={() =>
+                    void aktion.ausfuehren(async () => {
+                      await stornieren(db, id, storno.id)
+                      auswahl(undefined)
+                      melden('Verkauf storniert.')
+                    })
+                  }
+                >
+                  Storno bestätigen
+                </button>
+              </div>
+            )}
+          </section>
+        )}
         <section key={id}>
           <h3>Veranstaltungsname</h3>
           <form

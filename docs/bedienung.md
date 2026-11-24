@@ -7,13 +7,13 @@
 ## Bargeld und Gefäße
 
 1. Tippe für jedes Stück einmal auf die Produkttaste. Roter und weißer Glühwein haben eigene Tasten. Wähle bei Wein die Ausschankgröße. In der offenen Bestellung kannst du Mengen verringern oder eine Position entfernen.
-2. Für eine neue Tasse zählt das Pfand automatisch. Für ein mitgebrachtes Gefäß tippe einmal „− Pfand / Gefäß vorhanden“. Die Taste sperrt, sobald alle automatisch hinzugefügten Pfandpositionen ausgeglichen sind.
-3. Für jedes tatsächlich zurückgegebene leere Gefäß tippe „Pfandrückgabe“. Das funktioniert auch ohne Warenkauf. Über die Korrekturtasten in der Bestellung kannst du eine versehentliche Eingabe zurücknehmen.
+2. Für eine neue Tasse zählt das Pfand automatisch. Für ein mitgebrachtes Gefäß tippe einmal „− Pfand“.
+3. Für jedes zusätzlich zurückgegebene leere Gefäß tippe ebenfalls „− Pfand“. Zusätzliche Abzüge zählen als ausgezahltes Pfand. Das funktioniert auch ohne Warenkauf. Über die Korrekturtaste in der Bestellung kannst du einen Pfandabzug zurücknehmen.
 4. Prüfe Betrag und Richtung in der Summenleiste. Öffne „Zur Zahlung“. Wähle „Passend“, einen Schein oder „Anderer Betrag“. Gib das angezeigte Rückgeld heraus. Bei einer Auszahlung gibst du den angezeigten Betrag heraus. Nullbeträge und Auszahlungen kannst du direkt abschließen.
 5. Tippe „Vorgang abschließen“. Warte auf die Meldung mit der Vorgangsnummer. „Zur Bestellung“ führt vor dem Abschluss zurück.
-6. Bei einem Fehler öffne „Letzten Verkauf stornieren“, prüfe die Nummer und bestätige. Die Auswertung berücksichtigt die Gegenbuchung sofort. Helfer können das direkt an der Kasse erledigen.
+6. Bei einem Fehler öffne den Admin-Bereich, entsperre ihn mit der PIN und wähle „Letzten Verkauf stornieren“. Prüfe die Nummer und bestätige. Die Auswertung berücksichtigt die Gegenbuchung sofort.
 
-**Kontrollbeispiel.** Ein roter und ein weißer Glühwein zu je 3,50 €, zweimal „Gefäß vorhanden“ und zwei zurückgegebene Gläser zu je 2,00 € ergeben **3,00 € kassieren**. Die Statistik enthält 7,00 € Warenumsatz, 0,00 € eingenommenes und 4,00 € ausgezahltes Pfand.
+**Kontrollbeispiel.** Ein roter und ein weißer Glühwein zu je 3,50 €, viermal „− Pfand“ für zwei vorhandene und zwei zurückgegebene Gläser zu je 2,00 € ergeben **3,00 € kassieren**. Die Statistik enthält 7,00 € Warenumsatz, 0,00 € eingenommenes und 4,00 € ausgezahltes Pfand.
 
 ## Administration
 

@@ -67,23 +67,19 @@ test('startet dasselbe Profil nach vollständigem Schließen ohne Netz und kassi
     const csv = seite.waitForEvent('download')
     await taste(seite, 'CSV herunterladen').click()
     expect((await csv).suggestedFilename()).toBe('Winterfest.csv')
-    await taste(seite, 'Sperren und zur Kasse').click()
     await taste(seite, 'Letzten Verkauf stornieren').click()
     await taste(seite, 'Storno bestätigen').click()
-    await admin(seite)
     await seite.getByLabel('Neuer Veranstaltungsname').fill('Folgefest')
     await taste(seite, 'Neue Veranstaltung starten').click()
     await taste(seite, 'Abschluss bestätigen').click()
     await expect(
       seite.getByRole('heading', { name: 'Statistik · Folgefest' }),
     ).toBeVisible()
-    await seite
-      .getByLabel('Sicherungsdatei auswählen')
-      .setInputFiles({
-        name: 'Kassenstand.json',
-        mimeType: 'application/json',
-        buffer: datei,
-      })
+    await seite.getByLabel('Sicherungsdatei auswählen').setInputFiles({
+      name: 'Kassenstand.json',
+      mimeType: 'application/json',
+      buffer: datei,
+    })
     await taste(seite, 'Gesamten Kassenstand ersetzen').click()
     await expect(taste(seite, 'Admin-Bereich')).toBeVisible()
     await profil.close()
@@ -107,17 +103,24 @@ test('startet dasselbe Profil nach vollständigem Schließen ohne Netz und kassi
     await neu.getByLabel('Neuer Veranstaltungsname').fill('Nächster Markttag')
     await taste(neu, 'Neue Veranstaltung starten').click()
     await taste(neu, 'Abschluss bestätigen').click()
-    await expect(neu.getByRole('heading', { name: 'Statistik · Nächster Markttag' })).toBeVisible()
+    await expect(
+      neu.getByRole('heading', { name: 'Statistik · Nächster Markttag' }),
+    ).toBeVisible()
     const ende = neu.waitForEvent('download')
     await taste(neu, 'Sicherung herunterladen').click()
     const stand = JSON.parse(
       await readFile((await (await ende).path())!, 'utf8'),
     )
     expect(stand.daten.transactions).toHaveLength(2)
-    expect(stand.daten.events).toEqual(expect.arrayContaining([
-      expect.objectContaining({ name: 'Winterfest', status: 'closed' }),
-      expect.objectContaining({ name: 'Nächster Markttag', status: 'active' }),
-    ]))
+    expect(stand.daten.events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Winterfest', status: 'closed' }),
+        expect.objectContaining({
+          name: 'Nächster Markttag',
+          status: 'active',
+        }),
+      ]),
+    )
   } finally {
     await profil.close()
     if (verzeichnis.startsWith(resolve(tmpdir(), 'kassenprofil-')))
@@ -187,11 +190,14 @@ test('wartet auf vollständigen Precache und übernimmt Updates erst nach der of
     })
     const update = taste(page, 'Update übernehmen')
     await expect(update).toBeDisabled()
-    await expect(page.getByText('5,50 € kassieren')).toBeVisible()
+    await expect(
+      page.locator('.bestellung').getByText('5,50 € kassieren'),
+    ).toBeVisible()
     await abschliessen(page)
     await expect(update).toBeEnabled()
     await Promise.all([page.waitForEvent('load'), update.click()])
     await expect(update).toHaveCount(0)
+    await admin(page)
     await expect(taste(page, 'Letzten Verkauf stornieren')).toBeVisible()
   } finally {
     freigeben()

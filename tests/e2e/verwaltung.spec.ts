@@ -33,7 +33,9 @@ test('pflegt Artikel, gemeinsame Preise, Pfand und Verfügbarkeit', async ({
   await taste(page, /^Probeartikel/).click()
   await abschliessen(page)
   await taste(page, /^Glühwein weiß 0/).click()
-  await expect(page.getByText('7,10 € kassieren')).toBeVisible()
+  await expect(
+    page.locator('.bestellung').getByText('7,10 € kassieren'),
+  ).toBeVisible()
   await abschliessen(page)
   await admin(page)
   const probe = page.getByRole('listitem').filter({ hasText: 'Probeartikel' })

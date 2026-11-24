@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import {
   barzahlung,
@@ -8,56 +8,55 @@ import {
   schnellbetraege,
   type Bestand,
 } from '../domain/kasse'
-import {
-  letzterVerkauf,
-  neueId,
-  sortiment,
-  stornieren,
-  verkaufen,
-} from '../application/kasse'
+import { neueId, sortiment, verkaufen } from '../application/kasse'
 import { db } from '../storage/db'
 import { Fehler, useAktion } from './formulare'
 
 export function Kasse({
   eventId,
   offenMelden,
+  zahlungMelden,
 }: {
   eventId: string
   offenMelden: (offen: boolean) => void
+  zahlungMelden?: (zahlung: boolean) => void
 }) {
   const daten = useLiveQuery(
     () =>
-      db.transaction(
-        'r',
-        [db.products, db.eventSettings, db.transactions],
-        async () => ({
-          produkte: await sortiment(db, eventId),
-          pfand: (await db.eventSettings.get(eventId))?.pfand,
-          letzter: await letzterVerkauf(db, eventId),
-        }),
-      ),
+      db.transaction('r', [db.products, db.eventSettings], async () => ({
+        produkte: await sortiment(db, eventId),
+        pfand: (await db.eventSettings.get(eventId))?.pfand,
+      })),
     [eventId],
   )
   const [mengen, setzen] = useState<Record<string, number>>({})
-  const [vorhanden, neutralisieren] = useState(0)
-  const [rueckgaben, zurueck] = useState(0)
+  const [minus, minusSetzen] = useState(0)
+
   const [zahlung, bezahlen] = useState<Bestand>()
-  const [storno, auswahl] = useState<{ id: string; nummer: number }>()
   const [meldung, melden] = useState('')
-  const aktion = useAktion()
   const produkte = daten?.produkte.filter((p) => p.aktiv) ?? []
   const zeilen = produkte
     .filter((p) => mengen[p.id] > 0)
     .map((artikel) => ({ artikel, menge: mengen[artikel.id] }))
-  const b = berechnen(zeilen, daten?.pfand ?? 0, vorhanden, rueckgaben)
-  const offen = !!(b.positionen.length || rueckgaben || zahlung)
+  const automatisch = zeilen.reduce(
+    (n, z) => n + (z.artikel.pflicht ? z.menge : 0),
+    0,
+  )
+  const b = berechnen(
+    zeilen,
+    daten?.pfand ?? 0,
+    Math.min(minus, automatisch),
+    Math.max(0, minus - automatisch),
+  )
+  const offen = !!(b.positionen.length || minus || zahlung)
   useEffect(() => {
     offenMelden(offen)
     return () => offenMelden(false)
   }, [offen, offenMelden])
   useEffect(() => {
-    if (vorhanden > b.automatisch) neutralisieren(b.automatisch)
-  }, [vorhanden, b.automatisch])
+    zahlungMelden?.(!!zahlung)
+    return () => zahlungMelden?.(false)
+  }, [zahlung, zahlungMelden])
   function menge(id: string, neu: number) {
     setzen((alt) => ({ ...alt, [id]: Math.max(0, neu) }))
     melden('')
@@ -71,8 +70,7 @@ export function Kasse({
         buchen={async (gegeben, id) => {
           const buchung = await verkaufen(db, eventId, id, zahlung, gegeben)
           setzen({})
-          neutralisieren(0)
-          zurueck(0)
+          minusSetzen(0)
           bezahlen(undefined)
           melden('Vorgang ' + buchung.nummer + ' gebucht.')
         }}
@@ -90,30 +88,32 @@ export function Kasse({
                 className={'produkt' + (p.pflicht ? ' mit-pfand' : '')}
                 onClick={() => menge(p.id, (mengen[p.id] ?? 0) + 1)}
               >
-                <strong>{p.name}</strong>
+                <strong>
+                  {p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}
+                </strong>
                 <small>{p.einheit}</small>
                 <span>{geld(p.preis)}</span>
               </button>
             ))}
           </div>
-          <h3>Gefäße</h3>
-          <div className="aktionen">
-            <button
-              disabled={b.vorhanden >= b.automatisch}
-              onClick={() => neutralisieren((v) => v + 1)}
-            >
-              − Pfand / Gefäß vorhanden
-            </button>
-            <button onClick={() => zurueck((v) => v + 1)}>Pfandrückgabe</button>
-          </div>
+          <button
+            className="minus-pfand"
+            onClick={() => minusSetzen((v) => v + 1)}
+          >
+            − Pfand <span>− {geld(b.pfand)}</span>
+          </button>
         </section>
         <section className="bestellung">
           <h2>Offene Bestellung</h2>
+          <p className="bestellsumme">
+            {geld(Math.abs(b.summe))} {b.summe < 0 ? 'auszahlen' : 'kassieren'}
+          </p>
           {!offen && <p>Noch keine Artikel oder Rückgaben.</p>}
           {b.positionen.map((p) => (
             <div className="position" key={p.id}>
               <strong>
-                {p.name} <small>{p.einheit}</small>
+                {p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}{' '}
+                <small>{p.einheit}</small>
               </strong>
               <span>
                 {p.menge} × {geld(p.preis)}
@@ -137,45 +137,25 @@ export function Kasse({
           <dl>
             <dt>Automatisches Pfand · {b.automatisch}×</dt>
             <dd>{geld(b.automatisch * b.pfand)}</dd>
-            <dt>Gefäß vorhanden · {b.vorhanden}×</dt>
-            <dd>{geld(-b.vorhanden * b.pfand)}</dd>
-            <dt>Pfandrückgaben · {b.rueckgaben}×</dt>
-            <dd>{geld(-b.ausgezahlt)}</dd>
+            <dt>− Pfand · {minus}×</dt>
+            <dd>{geld(-minus * b.pfand)}</dd>
           </dl>
-          {b.vorhanden > 0 && (
-            <button onClick={() => neutralisieren((v) => v - 1)}>
-              Gefäß vorhanden zurücknehmen
+          {minus > 0 && (
+            <button onClick={() => minusSetzen((v) => v - 1)}>
+              Einen Pfandabzug entfernen
             </button>
           )}
-          {rueckgaben > 0 && (
-            <button onClick={() => zurueck((v) => v - 1)}>
-              Eine Rückgabe entfernen
-            </button>
-          )}
-          {daten.letzter && (
-            <button onClick={() => auswahl(daten.letzter)}>
-              Letzten Verkauf stornieren
-            </button>
-          )}
-          {storno && (
-            <div role="group" aria-label="Storno bestätigen">
-              <p>Verkauf {storno.nummer} vollständig stornieren?</p>
-              <button onClick={() => auswahl(undefined)}>Abbrechen</button>
-              <button
-                disabled={aktion.beschaeftigt}
-                onClick={() =>
-                  void aktion.ausfuehren(async () => {
-                    await stornieren(db, eventId, storno.id)
-                    auswahl(undefined)
-                    melden('Verkauf storniert.')
-                  })
-                }
-              >
-                Storno bestätigen
-              </button>
-            </div>
-          )}
-          <Fehler text={aktion.fehler} />
+          <button
+            className="bestellung-loeschen"
+            disabled={!offen}
+            onClick={() => {
+              setzen({})
+              minusSetzen(0)
+              melden('')
+            }}
+          >
+            Bestellung leeren
+          </button>
           <p role="status">{meldung}</p>
         </section>
       </div>
@@ -207,6 +187,7 @@ function Zahlung({
   const [id] = useState(neueId)
   const [wahl, waehlen] = useState<number | 'frei' | undefined>()
   const [text, eingeben] = useState('')
+  const eingabe = useRef<HTMLInputElement>(null)
   const aktion = useAktion()
   let gegeben = 0
   let hinweis = ''
@@ -225,8 +206,29 @@ function Zahlung({
     hinweis = (e as Error).message
   }
   return (
-    <main className="einrichtung">
+    <main className="zahlungsseite">
       <h2>Barzahlung</h2>
+      <section className="zahlungszusammenfassung">
+        <h3>Bestellung</h3>
+        {bestand.positionen.map((p) => (
+          <div className="zahlungsposition" key={p.id}>
+            <span>
+              {p.menge} ×{' '}
+              {p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}{' '}
+              {p.einheit}
+            </span>
+            <strong>{geld(p.preis * p.menge)}</strong>
+          </div>
+        ))}
+        <dl>
+          <dt>Automatisches Pfand · {bestand.automatisch}×</dt>
+          <dd>{geld(bestand.automatisch * bestand.pfand)}</dd>
+          <dt>− Pfand · {bestand.vorhanden + bestand.rueckgaben}×</dt>
+          <dd>
+            {geld(-(bestand.vorhanden + bestand.rueckgaben) * bestand.pfand)}
+          </dd>
+        </dl>
+      </section>
       <p className="gross">
         {geld(Math.abs(bestand.summe))}{' '}
         {bestand.summe < 0 ? 'auszahlen' : 'kassieren'}
@@ -239,20 +241,34 @@ function Zahlung({
               {c / 100} €
             </button>
           ))}
-          <button onClick={() => waehlen('frei')}>Anderer Betrag</button>
-          {wahl === 'frei' && (
-            <label>
-              Erhaltenes Bargeld (€)
-              <input
-                inputMode="decimal"
-                value={text}
-                onChange={(e) => eingeben(e.target.value)}
-              />
-            </label>
-          )}
+          <button
+            onClick={() => {
+              waehlen('frei')
+              if (eingabe.current?.parentElement)
+                eingabe.current.parentElement.hidden = false
+              eingabe.current?.focus()
+            }}
+          >
+            Anderer Betrag
+          </button>
+          <label hidden={wahl !== 'frei'}>
+            Erhaltenes Bargeld (€)
+            <input
+              ref={eingabe}
+              type="text"
+              inputMode="decimal"
+              value={text}
+              onChange={(e) => eingeben(e.target.value)}
+            />
+          </label>
         </div>
       )}
-      <p role="status">{hinweis}</p>
+      <p
+        role="status"
+        className={gueltig && bestand.summe > 0 ? 'rueckgeld' : ''}
+      >
+        {hinweis}
+      </p>
       <Fehler text={aktion.fehler} />
       <button disabled={aktion.beschaeftigt} onClick={zurueck}>
         Zur Bestellung

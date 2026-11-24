@@ -44,7 +44,7 @@ it('trennt neue Tasse, Nachfüllung und Leergut auch bei Nullbetrag', () => {
   expect(runde({ ...schorle, preis: 200 }, 1, 0, 1).summe).toBe(0)
 })
 it('prüft erhaltenes Bargeld, Schnellbeträge, freie Eingabe und Rückgeld', () => {
-  expect(schnellbetraege).toEqual([500, 1000, 2000])
+  expect(schnellbetraege).toEqual([500, 1000, 1500, 2000, 3000, 4000, 5000])
   expect(barzahlung(550, 550).rueckgeld).toBe(0)
   expect(barzahlung(550, 1000).rueckgeld).toBe(450)
   expect(barzahlung(550, euroEingabe('6')).rueckgeld).toBe(50)

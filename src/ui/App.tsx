@@ -55,6 +55,7 @@ function Betrieb({ geraet }: { geraet: Geraet }) {
     }
   }, [geraet.activeEventId])
   const [offen, bestellung] = useState(false)
+  const [zahlungsansicht, zahlungAnzeigen] = useState(false)
   const [persistent, speichern] = useState<boolean>()
   const aktion = useAktion()
   useEffect(() => {
@@ -64,7 +65,7 @@ function Betrieb({ geraet }: { geraet: Geraet }) {
     <>
       <nav aria-label="Kassenbereich">
         <strong>{event?.name}</strong>
-        {ansicht === 'kasse' ? (
+        {ansicht === 'kasse' && zahlungsansicht ? null : ansicht === 'kasse' ? (
           <button onClick={() => zeigen('pin')}>Admin-Bereich</button>
         ) : (
           <button
@@ -88,6 +89,7 @@ function Betrieb({ geraet }: { geraet: Geraet }) {
           key={geraet.activeEventId}
           eventId={geraet.activeEventId}
           offenMelden={bestellung}
+          zahlungMelden={zahlungAnzeigen}
         />
       </div>
       {ansicht === 'pin' && (

@@ -4,8 +4,8 @@ Für jedes Kassengerät und Browserprofil separat durchführen. Eine Testveranst
 
 - [ ] Die dauerhafte HTTPS-Adresse im normalen Browserprofil öffnen. App über das Browsermenü installieren, auf dem iPad über das Teilen-Menü zum Home-Bildschirm hinzufügen.
 - [ ] Testveranstaltung einrichten. Auf „Offline bereit“ warten. Im Admin-Bereich den Speicherstatus prüfen und eine vollständige Ausgangssicherung außerhalb des Geräts ablegen.
-- [ ] Gerät vom Netz trennen. Einen roten und einen weißen Glühwein, zwei vorhandene Gefäße und zwei Rückgaben erfassen. Bei Standardpreisen 3,00 € passend kassieren. In der Statistik 7,00 € Warenumsatz, 0,00 € eingenommenes und 4,00 € ausgezahltes Pfand prüfen.
-- [ ] Mit den vorgesehenen Handschuhen zusätzlich rot und weiß, ein vorhandenes Gefäß und eine Rückgabe antippen. Bei Standardpreisen müssen 7,00 € erscheinen. Alle Tasten müssen einzeln ohne Zoom erreichbar sein.
+- [ ] Gerät vom Netz trennen. Einen roten und einen weißen Glühwein, viermal „− Pfand“ für zwei vorhandene Gefäße und zwei Rückgaben erfassen. Bei Standardpreisen 3,00 € passend kassieren. In der Statistik 7,00 € Warenumsatz, 0,00 € eingenommenes und 4,00 € ausgezahltes Pfand prüfen.
+- [ ] Mit den vorgesehenen Handschuhen zusätzlich rot und weiß, zweimal „− Pfand“ für ein vorhandenes und ein zurückgegebenes Gefäß antippen. Bei Standardpreisen müssen 7,00 € erscheinen. Alle Tasten müssen einzeln ohne Zoom erreichbar sein.
 - [ ] Einen Beispielverkauf stornieren. Korrigierte Statistik öffnen, CSV und JSON herunterladen. Beide Dateien am vorgesehenen Speicherort kontrollieren.
 - [ ] Browser vollständig schließen und offline erneut öffnen. Vorgangsnummer und Statistik kontrollieren und einen weiteren Verkauf abschließen.
 - [ ] Auf einem Testprofil die JSON-Datei auswählen, zunächst abbrechen, dann erneut auswählen und das Ersetzen bestätigen. Mit der gesicherten PIN Veranstaltung und Werte prüfen.
