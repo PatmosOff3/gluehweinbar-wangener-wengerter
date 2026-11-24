@@ -1,0 +1,57 @@
+{
+  "format": "gluehweinbar-kasse",
+  "version": 1,
+  "anwendung": "1.0.0",
+  "erstellt": "2026-01-01T00:00:00.000Z",
+  "daten": {
+    "deviceSettings": [
+      {
+        "id": "geraet",
+        "activeEventId": "de795761-3771-42fe-9dbc-4a724837ef07",
+        "pin": {
+          "version": 1,
+          "verfahren": "PBKDF2-SHA-256",
+          "iterationen": 600000,
+          "salt": "0123456789abcdef0123456789abcdef",
+          "pruefwert": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      }
+    ],
+    "events": [
+      {
+        "id": "de795761-3771-42fe-9dbc-4a724837ef07",
+        "name": "Beispiel",
+        "status": "active",
+        "start": "2026-01-01T00:00:00.000Z",
+        "naechsteNummer": 1
+      }
+    ],
+    "eventSettings": [
+      {
+        "eventId": "de795761-3771-42fe-9dbc-4a724837ef07",
+        "pfand": 200
+      }
+    ],
+    "products": [
+      {
+        "id": "9f33ef5e-8a9f-4000-a072-c2b22002f800",
+        "eventId": "de795761-3771-42fe-9dbc-4a724837ef07",
+        "name": "Bier",
+        "einheit": "",
+        "preis": 300,
+        "pflicht": false,
+        "aktiv": true
+      },
+      {
+        "id": "9f33ef5e-8a9f-4000-a072-c2b22002f801",
+        "eventId": "de795761-3771-42fe-9dbc-4a724837ef07",
+        "name": "Wein",
+        "einheit": "",
+        "preis": 300,
+        "pflicht": false,
+        "aktiv": true
+      }
+    ],
+    "transactions": []
+  }
+}

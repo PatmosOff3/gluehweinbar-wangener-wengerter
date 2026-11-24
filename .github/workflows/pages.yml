@@ -1,0 +1,54 @@
+name: Kasse prüfen und veröffentlichen
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pruefen:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - run: npm run check
+      - id: seite
+        uses: actions/configure-pages@v5
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      - name: Kasse für die Pages-Adresse bauen
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: npm run build
+        env:
+          PAGES_BASE_PATH: ${{ steps.seite.outputs.base_path }}
+      - uses: actions/upload-pages-artifact@v4
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        with:
+          path: dist
+
+  veroeffentlichen:
+    needs: pruefen
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - id: pages
+        uses: actions/deploy-pages@v4
