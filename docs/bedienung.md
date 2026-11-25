@@ -9,11 +9,13 @@
 1. Tippe für jedes Stück einmal auf die Produkttaste. Roter und weißer Glühwein haben eigene Tasten. Wähle bei Wein die Ausschankgröße. In der offenen Bestellung kannst du Mengen verringern oder eine Position entfernen.
 2. Für eine neue Tasse zählt das Pfand automatisch. Für ein mitgebrachtes Gefäß tippe einmal „− Pfand“.
 3. Für jedes zusätzlich zurückgegebene leere Gefäß tippe ebenfalls „− Pfand“. Zusätzliche Abzüge zählen als ausgezahltes Pfand. Das funktioniert auch ohne Warenkauf. Über die Korrekturtaste in der Bestellung kannst du einen Pfandabzug zurücknehmen.
-4. Prüfe Betrag und Richtung in der Summenleiste. Öffne „Zur Zahlung“. Wähle „Passend“, einen Schein oder „Anderer Betrag“. Gib das angezeigte Rückgeld heraus. Bei einer Auszahlung gibst du den angezeigten Betrag heraus. Nullbeträge und Auszahlungen kannst du direkt abschließen.
-5. Tippe „Vorgang abschließen“. Warte auf die Meldung mit der Vorgangsnummer. „Zur Bestellung“ führt vor dem Abschluss zurück.
+4. Prüfe Betrag und Vorzeichen in der Summenleiste: Grün und „+“ stehen für Einnahmen, Rot und „−“ für Auszahlungen. Öffne „Zur Zahlung“. Wähle „Passend“ oder einen Schein: Das Rückgeld erscheint in einem Popup. Bei „Anderer Betrag“ gibst du das erhaltene Bargeld ein und tippst auf „Rückgeld anzeigen“. Bei einer Auszahlung gibst du den angezeigten Betrag heraus. Nullbeträge und Auszahlungen kannst du direkt abschließen.
+5. Gib das Rückgeld heraus und tippe im Popup auf den großen Button „Vorgang abschließen“. Warte auf die Meldung mit der Vorgangsnummer. „Zurück zur Bestellung“ führt ohne Buchung zurück; „Bargeld ändern“ schließt nur das Popup, damit du die erhaltene Summe korrigieren kannst.
 6. Bei einem Fehler öffne den Admin-Bereich, entsperre ihn mit der PIN und wähle „Letzten Verkauf stornieren“. Prüfe die Nummer und bestätige. Die Auswertung berücksichtigt die Gegenbuchung sofort.
 
 **Kontrollbeispiel.** Ein roter und ein weißer Glühwein zu je 4,00 €, viermal „− Pfand“ für zwei vorhandene und zwei zurückgegebene Gläser zu je 5,00 € ergeben **2,00 € auszahlen**. Die Statistik enthält 8,00 € Warenumsatz, 0,00 € eingenommenes und 10,00 € ausgezahltes Pfand.
+
+„Zur letzten Bestellung“ auf dem ersten Kassenbildschirm zeigt die zuletzt abgeschlossene Bestellung dieser Veranstaltung mit den damals gebuchten Beträgen, erhaltenem Bargeld und Rückgeld. Der Rückblick bucht nichts erneut und bleibt nach einem Neustart verfügbar. Eine bereits begonnene neue Bestellung bleibt erhalten; „Zurück zur Bestellung“ bringt dich zu ihr zurück. Eine stornierte letzte Bestellung ist entsprechend gekennzeichnet.
 
 ## Administration
 

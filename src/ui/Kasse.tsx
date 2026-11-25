@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import {
   barzahlung,
@@ -8,6 +8,7 @@ import {
   schnellbetraege,
   type Bestand,
   type Produkt,
+  type Buchung,
 } from '../domain/kasse'
 import { neueId, sortiment, verkaufen } from '../application/kasse'
 import { db } from '../storage/db'
@@ -24,9 +25,10 @@ export function Kasse({
 }) {
   const daten = useLiveQuery(
     () =>
-      db.transaction('r', [db.products, db.eventSettings], async () => ({
+      db.transaction('r', [db.products, db.eventSettings, db.transactions], async () => ({
         produkte: await sortiment(db, eventId),
         pfand: (await db.eventSettings.get(eventId))?.pfand,
+        buchungen: await db.transactions.where('eventId').equals(eventId).sortBy('nummer'),
       })),
     [eventId],
   )
@@ -34,6 +36,8 @@ export function Kasse({
   const [minus, minusSetzen] = useState(0)
 
   const [zahlung, bezahlen] = useState<Bestand>()
+  const [rueckblick, letzteAnzeigen] = useState(false)
+  const letzte = daten?.buchungen.filter((p) => p.art === 'verkauf').at(-1)
   const [meldung, melden] = useState('')
   const produkte = daten?.produkte.filter((p) => p.aktiv) ?? []
   const prioritaet = ['Glühwein rot', 'Glühwein weiß', 'Bier']
@@ -60,14 +64,16 @@ export function Kasse({
     return () => offenMelden(false)
   }, [offen, offenMelden])
   useEffect(() => {
-    zahlungMelden?.(!!zahlung)
+    zahlungMelden?.(!!zahlung || rueckblick)
     return () => zahlungMelden?.(false)
-  }, [zahlung, zahlungMelden])
+  }, [zahlung, rueckblick, zahlungMelden])
   function menge(id: string, neu: number) {
     setzen((alt) => ({ ...alt, [id]: Math.max(0, neu) }))
     melden('')
   }
   if (daten?.pfand === undefined) return <main>Kasse wird geladen …</main>
+  if (rueckblick && letzte)
+    return <LetzteBestellung buchung={letzte} storniert={!!daten.buchungen.find((b) => b.storniertId === letzte.id)} zurueck={() => letzteAnzeigen(false)} />
   if (zahlung)
     return (
       <Zahlung
@@ -115,15 +121,10 @@ export function Kasse({
         </section>
         <section className="bestellung">
           <h2>Offene Bestellung</h2>
-          <p className={'bestellsumme' + (b.summe < 0 ? ' auszahlung' : '')}>
-            {geld(Math.abs(b.summe))} {b.summe < 0 ? 'auszahlen' : 'kassieren'}
+          <p className={'bestellsumme' + (b.summe < 0 ? ' auszahlung' : b.summe > 0 ? ' einnahme' : '')}>
+            {b.summe < 0 ? '−' : '+'} {geld(Math.abs(b.summe))}
           </p>
-          <div
-            className="bestellpositionen"
-            tabIndex={0}
-            role="region"
-            aria-label="Bestellpositionen"
-          >
+          <Bestellpositionen>
             {!offen && <p>Noch keine Artikel oder Rückgaben.</p>}
             {b.positionen.map((p) => (
               <div className="position" key={p.id}>
@@ -150,7 +151,7 @@ export function Kasse({
                 </div>
               </div>
             ))}
-          </div>
+          </Bestellpositionen>
           <dl>
             <dt>Automatisches Pfand · {b.automatisch}×</dt>
             <dd>{geld(b.automatisch * b.pfand)}</dd>
@@ -177,9 +178,11 @@ export function Kasse({
         </section>
       </div>
       <div className="summenleiste">
-        <strong className={b.summe < 0 ? 'auszahlung' : ''}>
-          {geld(Math.abs(b.summe))} {b.summe < 0 ? 'auszahlen' : 'kassieren'}
+        <strong className={b.summe < 0 ? 'auszahlung' : b.summe > 0 ? 'einnahme' : ''}>
+          {b.summe < 0 ? '−' : '+'} {geld(Math.abs(b.summe))}
         </strong>
+        <div className="aktionen">
+        <button disabled={!letzte} onClick={() => letzteAnzeigen(true)}>Zur letzten Bestellung</button>
         <button
           className="primaer"
           disabled={!offen}
@@ -187,8 +190,78 @@ export function Kasse({
         >
           Zur Zahlung
         </button>
+        </div>
       </div>
     </main>
+  )
+}
+
+function LetzteBestellung({ buchung, storniert, zurueck }: { buchung: Buchung; storniert: boolean; zurueck: () => void }) {
+  return <main className="zahlungsseite">
+    <h2>Letzte Bestellung · Vorgang {buchung.nummer}</h2>
+    <p>{storniert ? 'Storniert' : 'Bereits abgeschlossen'} · {new Date(buchung.zeit).toLocaleString('de-DE')}</p>
+    <section className="zahlungszusammenfassung">
+      <h3>Bestellung</h3>
+      {buchung.positionen.map((p) => <div className="zahlungsposition" key={p.id}><span>{p.menge} × {p.name} {p.einheit}</span><strong>{geld(p.menge * p.preis)}</strong></div>)}
+      <dl>
+        <dt>Automatisches Pfand · {buchung.automatisch}×</dt><dd>{geld(buchung.automatisch * buchung.pfand)}</dd>
+        <dt>− Pfand · {buchung.vorhanden + buchung.rueckgaben}×</dt><dd className="auszahlung">{geld(-(buchung.vorhanden + buchung.rueckgaben) * buchung.pfand)}</dd>
+        <dt>Erhaltenes Bargeld</dt><dd>{geld(buchung.gegeben)}</dd>
+      </dl>
+    </section>
+    <p className={'gross ' + (buchung.summe < 0 ? 'auszahlung' : buchung.summe > 0 ? 'einnahme' : '')}>{buchung.summe < 0 ? '−' : '+'} {geld(Math.abs(buchung.summe))}</p>
+    {buchung.summe > 0 && <p className="rueckgeld">{geld(buchung.rueckgeld)} Rückgeld</p>}
+    <button className="primaer" onClick={zurueck}>Zurück zur Bestellung</button>
+  </main>
+}
+
+function ZahlungsPopup({ children, schliessen, gesperrt }: { children: ReactNode; schliessen: () => void; gesperrt: boolean }) {
+  const dialog = useRef<HTMLDialogElement>(null)
+  useEffect(() => {
+    const element = dialog.current
+    element?.showModal()
+    return () => element?.close()
+  }, [])
+  return <dialog ref={dialog} className="zahlungs-popup" aria-labelledby="rueckgeld-titel" onCancel={(e) => {
+    e.preventDefault()
+    if (!gesperrt) schliessen()
+  }}>{children}</dialog>
+}
+
+function Bestellpositionen({ children }: { children: ReactNode }) {
+  const liste = useRef<HTMLDivElement>(null)
+  const inhalt = useRef<HTMLDivElement>(null)
+  const [richtung, setzen] = useState({ oben: false, unten: false })
+  useEffect(() => {
+    const element = liste.current
+    const positionen = inhalt.current
+    if (!element || !positionen) return
+    const pruefen = () => {
+      const oben = element.scrollTop > 1
+      const unten = element.scrollHeight - element.clientHeight - element.scrollTop > 1
+      setzen((alt) => alt.oben === oben && alt.unten === unten ? alt : { oben, unten })
+    }
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(pruefen) : undefined
+    observer?.observe(element)
+    observer?.observe(positionen)
+    element.addEventListener('scroll', pruefen, { passive: true })
+    window.addEventListener('resize', pruefen)
+    pruefen()
+    return () => {
+      observer?.disconnect()
+      element.removeEventListener('scroll', pruefen)
+      window.removeEventListener('resize', pruefen)
+    }
+  }, [])
+  return (
+    <div className="bestellbereich">
+      <div ref={liste} className="bestellpositionen" tabIndex={0} role="region" aria-label="Bestellpositionen">
+        <div ref={inhalt}>{children}</div>
+      </div>
+      <p className="scrollhinweis" style={{ visibility: richtung.oben || richtung.unten ? 'visible' : 'hidden' }}>
+        {richtung.oben && '↑ ' }Weitere Artikel{richtung.unten && ' ↓'}
+      </p>
+    </div>
   )
 }
 
@@ -204,6 +277,7 @@ function Zahlung({
   const [id] = useState(neueId)
   const [wahl, waehlen] = useState<number | 'frei' | undefined>()
   const [text, eingeben] = useState('')
+  const [popup, popupZeigen] = useState(false)
   const eingabe = useRef<HTMLInputElement>(null)
   const aktion = useAktion()
   let gegeben = 0
@@ -246,19 +320,19 @@ function Zahlung({
           </dd>
         </dl>
       </section>
-      <p className={'gross' + (bestand.summe < 0 ? ' auszahlung' : '')}>
-        {geld(Math.abs(bestand.summe))}{' '}
-        {bestand.summe < 0 ? 'auszahlen' : 'kassieren'}
+      <p className={'gross' + (bestand.summe < 0 ? ' auszahlung' : bestand.summe > 0 ? ' einnahme' : '')}>
+        {bestand.summe < 0 ? '−' : '+'} {geld(Math.abs(bestand.summe))}
       </p>
       {bestand.summe > 0 && (
-        <div className="aktionen">
-          <button onClick={() => waehlen(bestand.summe)}>Passend</button>
+        <div className="geldwahl" role="group" aria-label="Erhaltenes Bargeld auswählen">
+          <button aria-pressed={wahl === bestand.summe} onClick={() => { waehlen(bestand.summe); popupZeigen(true) }}>Passend</button>
           {schnellbetraege.map((c) => (
-            <button key={c} onClick={() => waehlen(c)}>
+            <button key={c} aria-pressed={wahl === c} onClick={() => { waehlen(c); popupZeigen(true) }}>
               {c / 100} €
             </button>
           ))}
           <button
+            aria-pressed={wahl === 'frei'}
             onClick={() => {
               waehlen('frei')
               if (eingabe.current?.parentElement)
@@ -280,23 +354,32 @@ function Zahlung({
           </label>
         </div>
       )}
-      <p
+      {!popup && <p
         role="status"
         className={gueltig && bestand.summe > 0 ? 'rueckgeld' : ''}
       >
         {hinweis}
-      </p>
-      <Fehler text={aktion.fehler} />
+      </p>}
+      {!popup && <Fehler text={aktion.fehler} />}
       <button disabled={aktion.beschaeftigt} onClick={zurueck}>
         Zur Bestellung
       </button>
       <button
         className="primaer"
         disabled={!gueltig || aktion.beschaeftigt}
-        onClick={() => void aktion.ausfuehren(() => buchen(gegeben, id))}
+        onClick={() => bestand.summe > 0 ? popupZeigen(true) : void aktion.ausfuehren(() => buchen(gegeben, id))}
       >
-        Vorgang abschließen
+        {bestand.summe > 0 ? 'Rückgeld anzeigen' : 'Vorgang abschließen'}
       </button>
+      {popup && <ZahlungsPopup schliessen={() => popupZeigen(false)} gesperrt={aktion.beschaeftigt}>
+        <h2 id="rueckgeld-titel">{gueltig ? 'Rückgeld' : 'Bargeld prüfen'}</h2>
+        <p className={gueltig ? 'rueckgeld' : 'fehler'} role="status">{hinweis}</p>
+        <p>Erhalten: {geld(gegeben)} · Gesamt: {geld(bestand.summe)}</p>
+        <Fehler text={aktion.fehler} />
+        <button className="primaer popup-abschluss" autoFocus disabled={!gueltig || aktion.beschaeftigt} onClick={() => void aktion.ausfuehren(() => buchen(gegeben, id))}>Vorgang abschließen</button>
+        <button className="popup-zurueck" disabled={aktion.beschaeftigt} onClick={zurueck}>Zurück zur Bestellung</button>
+        <button className="popup-zurueck" disabled={aktion.beschaeftigt} onClick={() => popupZeigen(false)}>Bargeld ändern</button>
+      </ZahlungsPopup>}
     </main>
   )
 }

@@ -27,7 +27,7 @@ test('prüft Ersteinrichtung, Zugang, Mengentasten, Rückgeld, Auszahlung und Do
   await taste(page, 'Glühwein rot verringern').click()
   await taste(page, 'Glühwein weiß entfernen').click()
   await expect(
-    page.locator('.bestellung').getByText('9,00 € kassieren'),
+    page.locator('.bestellung').getByText('+ 9,00 €'),
   ).toBeVisible()
   await taste(page, 'Zur Zahlung').click()
   await expect(page.locator('.zahlungszusammenfassung')).toContainText(
@@ -40,8 +40,10 @@ test('prüft Ersteinrichtung, Zugang, Mengentasten, Rückgeld, Auszahlung und Do
   await taste(page, '5 €').click()
   await expect(page.getByText(/reicht nicht aus/)).toBeVisible()
   await expect(taste(page, 'Vorgang abschließen')).toBeDisabled()
+  await taste(page, 'Bargeld ändern').click()
   await taste(page, '10 €').click()
   await expect(page.getByText('1,00 € Rückgeld')).toBeVisible()
+  await taste(page, 'Bargeld ändern').click()
   await taste(page, 'Anderer Betrag').click()
   await expect(page.getByLabel('Erhaltenes Bargeld (€)')).toBeFocused()
   await expect(page.getByLabel('Erhaltenes Bargeld (€)')).toHaveAttribute(
@@ -50,6 +52,7 @@ test('prüft Ersteinrichtung, Zugang, Mengentasten, Rückgeld, Auszahlung und Do
   )
   await page.getByLabel('Erhaltenes Bargeld (€)').fill('9,50')
   await expect(page.getByText('0,50 € Rückgeld')).toBeVisible()
+  await taste(page, 'Rückgeld anzeigen').click()
   await taste(page, 'Vorgang abschließen').evaluate((button) => {
     ;(button as HTMLButtonElement).click()
     ;(button as HTMLButtonElement).click()
@@ -57,7 +60,7 @@ test('prüft Ersteinrichtung, Zugang, Mengentasten, Rückgeld, Auszahlung und Do
   await expect(page.getByText('Vorgang 1 gebucht.')).toBeVisible()
   await taste(page, /^− Pfand/).click()
   await expect(
-    page.locator('.bestellung').getByText('5,00 € auszahlen'),
+    page.locator('.bestellung').getByText('− 5,00 €'),
   ).toBeVisible()
   await abschliessen(page, '')
   await expect(page.getByText('Vorgang 2 gebucht.')).toBeVisible()
@@ -108,7 +111,7 @@ test('rechnet vier Gläser ab und prüft Offline-CSV, Storno, Sicherung und Wied
   await minus.click()
   await minus.click()
   await expect(
-    page.locator('.bestellung').getByText('2,00 € auszahlen'),
+    page.locator('.bestellung').getByText('− 2,00 €'),
   ).toBeVisible()
   await abschliessen(page, '')
   await admin(page)

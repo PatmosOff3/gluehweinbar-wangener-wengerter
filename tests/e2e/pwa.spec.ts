@@ -195,7 +195,7 @@ test('wartet auf vollständigen Precache und übernimmt Updates erst nach der of
     expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true)
     await expect(taste(page, 'Zur Zahlung')).toBeInViewport({ ratio: 1 })
     await expect(
-      page.locator('.bestellung').getByText('9,00 € kassieren'),
+      page.locator('.bestellung').getByText('+ 9,00 €'),
     ).toBeVisible()
     await abschliessen(page)
     await expect(update).toBeEnabled()

@@ -31,6 +31,6 @@ it.each([320, 1100])(
     expect(
       screen.getByRole('heading', { name: 'Offene Bestellung' }),
     ).toBeTruthy()
-    expect(screen.getAllByText('6,00 € kassieren')).toHaveLength(2)
+    expect(screen.getAllByText('+ 6,00 €')).toHaveLength(2)
   },
 )

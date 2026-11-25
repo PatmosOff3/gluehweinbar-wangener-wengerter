@@ -35,7 +35,7 @@ test('pflegt Artikel, gemeinsame Preise, Pfand und Verfügbarkeit', async ({
   await abschliessen(page)
   await taste(page, /^Glühwein weiß \d/).click()
   await expect(
-    page.locator('.bestellung').getByText('7,10 € kassieren'),
+    page.locator('.bestellung').getByText('+ 7,10 €'),
   ).toBeVisible()
   await abschliessen(page)
   await admin(page)
