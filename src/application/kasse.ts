@@ -8,7 +8,7 @@ import {
   type Buchung,
   type Produkt,
 } from '../domain/kasse'
-import { preisgruppe, standardsortiment } from '../domain/sortiment'
+import { preisgruppe, standardsortiment, SORTIMENTSSTAND } from '../domain/sortiment'
 import { type KassenDB, type Veranstaltung } from '../storage/db'
 import type { Pin } from './pin'
 
@@ -48,7 +48,7 @@ export async function einrichten(
         pin,
       })
       await db.events.add(event)
-      await db.eventSettings.add({ eventId: event.id, pfand })
+      await db.eventSettings.add({ eventId: event.id, pfand, sortimentsstand: SORTIMENTSSTAND })
       await db.products.bulkAdd(standardsortiment(event.id, neueId))
     },
   )
@@ -68,6 +68,46 @@ async function aktiv(db: KassenDB, eventId: string) {
 }
 export const sortiment = (db: KassenDB, eventId: string) =>
   db.products.where('eventId').equals(eventId).sortBy('sortierung')
+
+export async function finalePreisliste(db: KassenDB) {
+  await db.transaction('rw', [db.deviceSettings, db.events, db.eventSettings, db.products], async () => {
+    const geraet = await db.deviceSettings.get('geraet')
+    if (!geraet) return
+    const eventId = geraet.activeEventId
+    const event = await db.events.get(eventId)
+    const einstellungen = await db.eventSettings.get(eventId)
+    if (event?.status !== 'active' || !einstellungen)
+      throw new Error('Die aktive Veranstaltung oder ihre Pfandeinstellungen fehlen.')
+    if (einstellungen.sortimentsstand === SORTIMENTSSTAND) return
+    const bisher = await sortiment(db, eventId)
+    const vorgaben = standardsortiment(eventId, neueId)
+    const gluehweine = bisher.filter((p) => /^Glühwein (rot|weiß)$/.test(p.name) && ['', '0,2 l'].includes(p.einheit))
+    const alteGruppe = gluehweine.find((p) => p.gruppe)?.gruppe
+    const gruppe = alteGruppe && gluehweine.length === 2 &&
+      new Set(gluehweine.map((p) => p.name)).size === 2 &&
+      bisher.every((p) => p.gruppe !== alteGruppe || gluehweine.includes(p))
+      ? alteGruppe : neueId()
+    const aenderungen = vorgaben.map((v) => {
+      const treffer = bisher.filter((p) => p.name === v.name &&
+        (p.einheit === v.einheit || (/^Glühwein (rot|weiß)$/.test(v.name) && p.einheit === '0,2 l')))
+      // Unbekannte oder mehrdeutige Artikel werden nicht überschrieben.
+      const alt = treffer.length === 1 ? treffer[0] : undefined
+      return {
+        ...v,
+        ...(alt ? { id: alt.id, aktiv: alt.aktiv } : {}),
+        ...(/^Glühwein (rot|weiß)$/.test(v.name) ? { gruppe } : {}),
+      }
+    })
+    const bekannteIds = new Set(aenderungen.map((p) => p.id))
+    const weitere = bisher.filter((p) => !bekannteIds.has(p.id)).map((p, i) => ({
+      ...p,
+      sortierung: vorgaben.length + i,
+      ...(['Apfelschorle', 'Apfelsaftschorle'].includes(p.name) ? { aktiv: false } : {}),
+    }))
+    await db.products.bulkPut([...aenderungen, ...weitere])
+    await db.eventSettings.put({ ...einstellungen, pfand: 500, sortimentsstand: SORTIMENTSSTAND })
+  })
+}
 export const buchungen = (db: KassenDB, eventId: string) =>
   db.transactions.where('eventId').equals(eventId).sortBy('nummer')
 export const statistik = async (db: KassenDB, eventId: string) =>
@@ -87,7 +127,7 @@ export async function pfandSetzen(
     [db.events, db.deviceSettings, db.eventSettings],
     async () => {
       await aktiv(db, eventId)
-      await db.eventSettings.put({ eventId, pfand: positivOderNull(pfand) })
+      await db.eventSettings.update(eventId, { pfand: positivOderNull(pfand) })
     },
   )
 }
@@ -143,7 +183,7 @@ export async function wechseln(db: KassenDB, eventId: string, name: string) {
       })
       await db.events.update(eventId, { status: 'closed', ende: neu.start })
       await db.events.add(neu)
-      await db.eventSettings.add({ eventId: neu.id, pfand: bisher.pfand })
+      await db.eventSettings.add({ ...bisher, eventId: neu.id })
       await db.products.bulkAdd(kopien)
       await db.deviceSettings.update('geraet', { activeEventId: neu.id })
     },

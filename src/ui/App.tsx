@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type Geraet } from '../storage/db'
 import { pinPruefen } from '../application/pin'
+import { finalePreisliste } from '../application/kasse'
 import { Fensterwarnung, PwaStatus, speicherPruefen } from '../pwa/status'
 import { Einrichtung } from './Einrichtung'
 import { Verwaltung } from './Verwaltung'
@@ -14,27 +15,78 @@ export function App() {
     async () => (await db.deviceSettings.get('geraet')) ?? null,
     [],
   )
+  const [vorbereitet, bereit] = useState(false)
+  const [fehler, fehlerSetzen] = useState('')
+  useEffect(() => {
+    let aktiv = true
+    void finalePreisliste(db)
+      .then(() => {
+        if (aktiv) bereit(true)
+      })
+      .catch((e: Error) => {
+        if (aktiv)
+          fehlerSetzen('Die Preisliste konnte nicht vorbereitet werden: ' + e.message)
+      })
+    return () => {
+      aktiv = false
+    }
+  }, [])
   return (
     <>
-      <header>
-        <div className="marke">
-          <span aria-hidden="true">W</span>
-          <h1>Glühweinbar</h1>
-        </div>
-        <small>Wangener Wengerter</small>
-      </header>
       <Fensterwarnung />
-      {geraet === undefined ? (
-        <main>Kasse wird geladen …</main>
+      {fehler ? (
+        <>
+          <Kopf />
+          <main>
+            <Fehler text={fehler} />
+            <button onClick={() => window.location.reload()}>Erneut versuchen</button>
+          </main>
+        </>
+      ) : !vorbereitet || geraet === undefined ? (
+        <><Kopf /><main>Kasse wird geladen …</main></>
       ) : geraet ? (
         <Betrieb key={geraet.pin.pruefwert} geraet={geraet} />
       ) : (
         <>
+          <Kopf />
           <Einrichtung />
           <PwaStatus offen={false} />
         </>
       )}
     </>
+  )
+}
+function Kopf({ children }: { children?: ReactNode }) {
+  const [dunkel, setzen] = useState(() => {
+    try {
+      return localStorage.getItem('gluehweinbar-theme') === 'dunkel'
+    } catch {
+      return false
+    }
+  })
+  useEffect(() => {
+    document.documentElement.dataset.theme = dunkel ? 'dunkel' : 'hell'
+    try {
+      localStorage.setItem('gluehweinbar-theme', dunkel ? 'dunkel' : 'hell')
+    } catch {
+      // Die Auswahl gilt bei gesperrtem Speicher weiterhin für diese Sitzung.
+    }
+  }, [dunkel])
+  return (
+    <header className="kopf">
+      <div className="marke">
+        <span aria-hidden="true">W</span>
+        <h1>Glühweinbar</h1>
+      </div>
+      {children}
+      <button
+        className="theme-schalter"
+        aria-pressed={dunkel}
+        onClick={() => setzen(!dunkel)}
+      >
+        {dunkel ? 'Hellmodus' : 'Dunkelmodus'}
+      </button>
+    </header>
   )
 }
 function Betrieb({ geraet }: { geraet: Geraet }) {
@@ -63,7 +115,7 @@ function Betrieb({ geraet }: { geraet: Geraet }) {
   }, [ansicht === 'admin'])
   return (
     <>
-      <nav aria-label="Kassenbereich">
+      <Kopf><nav aria-label="Kassenbereich">
         <strong>{event?.name}</strong>
         {ansicht === 'kasse' && zahlungsansicht ? null : ansicht === 'kasse' ? (
           <button onClick={() => zeigen('pin')}>Admin-Bereich</button>
@@ -77,14 +129,14 @@ function Betrieb({ geraet }: { geraet: Geraet }) {
             {ansicht === 'admin' ? 'Sperren und zur Kasse' : 'Zur Kasse'}
           </button>
         )}
-      </nav>
+      </nav></Kopf>
       {wechselHinweis && (
         <aside role="status">
           {wechselHinweis}{' '}
           <button onClick={() => hinweisen('')}>Verstanden</button>
         </aside>
       )}
-      <div hidden={ansicht !== 'kasse'}>
+      <div className="kassenansicht" hidden={ansicht !== 'kasse'}>
         <Kasse
           key={geraet.activeEventId}
           eventId={geraet.activeEventId}

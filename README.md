@@ -18,6 +18,8 @@ npm run test:e2e
 
 Für lokale Änderungen startet `npm run dev` den Entwicklungsserver. `npm run preview` öffnet den statischen Build aus `dist/` über einen lokalen Server. Die Browsertests starten diesen Server selbst. `npm run check` führt alle automatisierten Prüfungen einschließlich Build in Folge aus.
 
+Falls WebKit unter Windows beim persistenten Offline-Test wegen langer Dateipfade keinen Cache schreiben kann, lässt sich mit `KASSEN_TEST_TMPDIR` ein vorhandenes kurzes temporäres Verzeichnis für die Testprofile vorgeben, beispielsweise `C:/.cache`. Die Tests entfernen ihre eigenen Profile anschließend wieder.
+
 ## Aufbau
 
 `src/domain` enthält ausschließlich reine TypeScript-Fachlogik. `storage` kapselt IndexedDB, `application` die Kassenabläufe. `export` verarbeitet die Dateiformate, `pwa` die Browserintegration und `ui` die Bedienoberfläche.

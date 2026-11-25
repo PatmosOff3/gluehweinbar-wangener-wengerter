@@ -1,16 +1,19 @@
 import type { Produkt } from './kasse'
 
 type Vorgabe = [name: string, einheit: string, preis: number, pflicht: boolean]
+export const SORTIMENTSSTAND = 'weihnachtsmarkt-2026-final' as const
 const vorgaben: Vorgabe[] = [
-  ['Glühwein rot', '0,2 l', 350, true],
-  ['Glühwein weiß', '0,2 l', 350, true],
-  ['Wein', '0,1 l', 250, true],
-  ['Wein', '0,2 l', 500, true],
-  ['Wein', 'Flasche, 0,75 l', 1500, false],
+  ['Glühwein rot', '', 400, true],
+  ['Glühwein weiß', '', 400, true],
   ['Bier', '0,33 l', 300, false],
-  ['Schnaps', '2 cl', 250, false],
-  ['Sprudel Classic', '0,5 l', 250, false],
-  ['Apfelschorle', '0,5 l', 250, false],
+  ['Wein', '0,1 l', 300, true],
+  ['Wein', '0,2 l', 600, true],
+  ['Wein', 'Flasche, 0,75 l', 1800, false],
+  ['Schnaps', '2 cl', 200, false],
+  ['Sprudel Classic', '0,5 l', 200, false],
+  ['Tresterbrand klar', '0,5 l', 1800, false],
+  ['Tresterbrand Barrique', '0,5 l', 1800, false],
+  ['Honig', '500 g', 800, false],
 ]
 
 export function standardsortiment(

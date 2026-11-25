@@ -4,8 +4,8 @@ Für jedes Kassengerät und Browserprofil separat durchführen. Eine Testveranst
 
 - [ ] Die dauerhafte HTTPS-Adresse im normalen Browserprofil öffnen. App über das Browsermenü installieren, auf dem iPad über das Teilen-Menü zum Home-Bildschirm hinzufügen.
 - [ ] Testveranstaltung einrichten. Auf „Offline bereit“ warten. Im Admin-Bereich den Speicherstatus prüfen und eine vollständige Ausgangssicherung außerhalb des Geräts ablegen.
-- [ ] Gerät vom Netz trennen. Einen roten und einen weißen Glühwein, viermal „− Pfand“ für zwei vorhandene Gefäße und zwei Rückgaben erfassen. Bei Standardpreisen 3,00 € passend kassieren. In der Statistik 7,00 € Warenumsatz, 0,00 € eingenommenes und 4,00 € ausgezahltes Pfand prüfen.
-- [ ] Mit den vorgesehenen Handschuhen zusätzlich rot und weiß, zweimal „− Pfand“ für ein vorhandenes und ein zurückgegebenes Gefäß antippen. Bei Standardpreisen müssen 7,00 € erscheinen. Alle Tasten müssen einzeln ohne Zoom erreichbar sein.
+- [ ] Gerät vom Netz trennen. Einen roten und einen weißen Glühwein, viermal „− Pfand“ für zwei vorhandene Gefäße und zwei Rückgaben erfassen. Bei Standardpreisen 2,00 € auszahlen. In der Statistik 8,00 € Warenumsatz, 0,00 € eingenommenes und 10,00 € ausgezahltes Pfand prüfen.
+- [ ] Mit den vorgesehenen Handschuhen zusätzlich rot und weiß, zweimal „− Pfand“ für ein vorhandenes und ein zurückgegebenes Gefäß antippen. Bei Standardpreisen müssen 8,00 € erscheinen. Alle Tasten müssen einzeln ohne Zoom erreichbar sein.
 - [ ] Einen Beispielverkauf stornieren. Korrigierte Statistik öffnen, CSV und JSON herunterladen. Beide Dateien am vorgesehenen Speicherort kontrollieren.
 - [ ] Browser vollständig schließen und offline erneut öffnen. Vorgangsnummer und Statistik kontrollieren und einen weiteren Verkauf abschließen.
 - [ ] Auf einem Testprofil die JSON-Datei auswählen, zunächst abbrechen, dann erneut auswählen und das Ersetzen bestätigen. Mit der gesicherten PIN Veranstaltung und Werte prüfen.
@@ -30,4 +30,13 @@ Die Browsermatrix läuft automatisiert mit Desktop- und emulierten Mobilprofilen
 
 Am 24. November 2026 hat der Betreiber den vorhandenen Funktionsumfang für seine Kassenaufzeichnungen akzeptiert. Die Kasse speichert Einzelbuchungen lokal und bietet CSV-Abrechnungen und JSON-Sicherungen. Für die Projektabnahme ist keine zusätzliche externe Prüfung vorgesehen.
 
-Honig kann ergänzt werden, sobald sein Preis feststeht. Die Schritte stehen in der [Bedienungsanleitung](bedienung.md).
+Honig ist für 8 € je 500 g im finalen Standardsortiment enthalten. Die Schritte stehen in der [Bedienungsanleitung](bedienung.md).
+
+## iPad-Querformat und Darstellungsmodus
+
+- [ ] Auf dem echten iPad mit eingeblendeten Safari-Leisten und als installierte PWA prüfen: alle elf Standardartikel, Minus-Pfand und Zur Zahlung sind ohne Seitenscrollen sichtbar.
+- [ ] Alle Artikel einmal erfassen: Nur die Positionsliste der offenen Bestellung scrollt. Summe, Pfandübersicht und Bestellaktionen bleiben sichtbar; auch die letzte Position kann entfernt werden.
+- [ ] Ohne Admin-PIN zwischen Dunkelmodus und Hellmodus wechseln; Lesbarkeit, Rot-/Weiß-Unterscheidung und rote Auszahlungsbeträge einschließlich Rückgeld prüfen.
+- [ ] Browser neu öffnen: Darstellungswahl und gebuchte Vorgänge sind erhalten. Safari-Leisten ein-/ausblenden und erneut die Erreichbarkeit der Zahlungsaktion prüfen.
+
+Automatisierte WebKit-Prüfungen verwenden 1105 × 688, 1105 × 604 und 1024 × 600 CSS-Pixel sowie beide Farbmodi. Diese Emulation ersetzt nicht die noch ausstehende Prüfung auf dem echten iPad.

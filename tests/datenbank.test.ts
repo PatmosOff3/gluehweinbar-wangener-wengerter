@@ -84,7 +84,7 @@ it('entscheidet bei gleichem Zeitstempel nach Nummer und korrigiert einen Verkau
   expect(ergebnisse.filter((e) => e.status === 'fulfilled')).toHaveLength(1)
   expect((await letzterVerkauf(db, id))?.id).toBe(a.id)
   expect(await statistik(db, id)).toMatchObject({
-    ware: 350,
+    ware: 400,
     eingenommen: 200,
     ausgezahlt: 0,
   })
@@ -148,10 +148,10 @@ it('kopiert alle Einstellungen und sperrt nach Wechsel auch eine zweite offene V
 })
 it('bewahrt gebuchte Werte bei Preis-, Namens-, Pfand- und Verfügbarkeitsänderungen', async () => {
   await buchen(0)
-  const bier = (await sortiment(db, id))[5]
-  await buchen(5)
+  const bier = (await sortiment(db, id))[2]
+  await buchen(2)
   await produktSpeichern(db, { ...bier, preis: 350 })
-  await buchen(5)
+  await buchen(2)
   expect(
     (await statistik(db, id)).artikel.find((p) => p.name === 'Bier')?.umsatz,
   ).toBe(650)
@@ -172,7 +172,7 @@ it('legt individuelle Produkte an, aktualisiert und filtert sie', async () => {
     preis: 123,
   }
   await produktSpeichern(db, honig)
-  expect(await sortiment(db, id)).toHaveLength(10)
+  expect(await sortiment(db, id)).toHaveLength(12)
   await expect(produktSpeichern(db, { ...honig, preis: -1 })).rejects.toThrow()
   await expect(produktSpeichern(db, { ...honig, name: ' ' })).rejects.toThrow()
   expect((await db.products.get(honig.id))?.preis).toBe(123)

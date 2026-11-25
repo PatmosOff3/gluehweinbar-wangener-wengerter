@@ -12,8 +12,10 @@ import {
 import { preisgruppe, standardsortiment } from '../src/domain/sortiment'
 
 const produkte = standardsortiment('fest', () => crypto.randomUUID())
-const [rot, weiss] = produkte
-const schorle = produkte[8]
+// Historische Rechenbeispiele bleiben unabhängig von den aktuellen Vorgaben.
+const rot = { ...produkte[0], preis: 350 }
+const weiss = { ...produkte[1], preis: 350 }
+const schorle = { ...produkte[7], preis: 250 }
 const runde = (artikel = rot, menge = 1, vorhanden = 0, rueck = 0) =>
   berechnen([{ artikel, menge }], 200, vorhanden, rueck)
 it('rechnet ausschließlich in sicheren ganzen Cent und Stückzahlen', () => {
@@ -83,16 +85,18 @@ it('summiert gebuchte Positionen und beide Pfandsummen unabhängig vom Wechselge
     auswerten([buchungen[1], umkehr(buchungen[1], '5', 5, '2026-11-02')]),
   ).toEqual({ artikel: [], ware: 0, eingenommen: 0, ausgezahlt: 0 })
 })
-it('führt neun bestätigte Artikel, getrennte Glühwein-IDs und einen gemeinsamen Preis', () => {
-  expect(produkte).toHaveLength(9)
+it('führt elf finale Artikel, getrennte Glühwein-IDs und einen gemeinsamen Preis', () => {
+  expect(produkte).toHaveLength(11)
   expect(produkte.map((p) => p.preis)).toEqual([
-    350, 350, 250, 500, 1500, 300, 250, 250, 250,
+    400, 400, 300, 300, 600, 1800, 200, 200, 1800, 1800, 800,
   ])
   expect(produkte.map((p) => p.pflicht)).toEqual([
     true,
     true,
+    false,
     true,
     true,
+    false,
     false,
     false,
     false,
@@ -106,5 +110,7 @@ it('führt neun bestätigte Artikel, getrennte Glühwein-IDs und einen gemeinsam
     [weiss.id, 400],
   ])
   expect(rot.id).not.toBe(weiss.id)
-  expect(produkte.some((p) => p.name.includes('Honig'))).toBe(false)
+  expect(produkte.some((p) => p.name === 'Honig')).toBe(true)
+  expect(produkte.some((p) => p.name.includes('schorle'))).toBe(false)
+  expect(produkte.slice(0, 2).map((p) => p.einheit)).toEqual(['', ''])
 })

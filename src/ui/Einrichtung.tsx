@@ -10,7 +10,7 @@ import { Wiederherstellung } from './Sicherungen'
 export function Einrichtung() {
   const [name, benennen] = useState('')
   const [pin, waehlen] = useState('')
-  const [pfand, aendern] = useState('2,00')
+  const [pfand, aendern] = useState('5,00')
   const [sortiment] = useState(() =>
     standardsortiment('vorschau', () => crypto.randomUUID()),
   )
@@ -68,7 +68,7 @@ export function Einrichtung() {
           <ul>
             {sortiment.map((p) => (
               <li key={p.id}>
-                {p.name} · {p.einheit} · {geld(p.preis)}
+                {p.name}{p.einheit && ' · ' + p.einheit} · {geld(p.preis)}
                 {p.pflicht && ' + Pfand'}
               </li>
             ))}

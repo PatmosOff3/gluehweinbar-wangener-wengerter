@@ -18,6 +18,7 @@ export interface Veranstaltung {
 export interface Einstellungen {
   eventId: string
   pfand: number
+  sortimentsstand?: 'weihnachtsmarkt-2026-final'
 }
 
 export const schemaV1 = {

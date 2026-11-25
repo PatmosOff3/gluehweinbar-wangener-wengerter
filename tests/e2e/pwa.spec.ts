@@ -35,7 +35,8 @@ test('startet dasselbe Profil nach vollständigem Schließen ohne Netz und kassi
   isMobile,
 }) => {
   const browserTyp = playwright[browserName]
-  const verzeichnis = await mkdtemp(resolve(tmpdir(), 'kassenprofil-'))
+  const testTmp = process.env.KASSEN_TEST_TMPDIR ?? tmpdir()
+  const verzeichnis = await mkdtemp(resolve(testTmp, 'kassenprofil-'))
   const optionen = {
     baseURL: 'http://127.0.0.1:4173',
     viewport,
@@ -58,7 +59,7 @@ test('startet dasselbe Profil nach vollständigem Schließen ohne Netz und kassi
     expect(leer.daten.transactions).toEqual([])
     await taste(seite, 'Sperren und zur Kasse').click()
     await profil.setOffline(true)
-    await taste(seite, /^Glühwein rot 0/).click()
+    await taste(seite, /^Glühwein rot \d/).click()
     await abschliessen(seite)
     await admin(seite)
     const download = seite.waitForEvent('download')
@@ -94,9 +95,9 @@ test('startet dasselbe Profil nach vollständigem Schließen ohne Netz und kassi
     await admin(neu)
     await expect(
       neu.getByRole('row').filter({ hasText: 'Glühwein rot' }),
-    ).toContainText('3,50 €')
+    ).toContainText('4,00 €')
     await taste(neu, 'Sperren und zur Kasse').click()
-    await taste(neu, /^Glühwein weiß 0/).click()
+    await taste(neu, /^Glühwein weiß \d/).click()
     await abschliessen(neu)
     await expect(neu.getByText('Vorgang 2 gebucht.')).toBeVisible()
     await admin(neu)
@@ -123,7 +124,7 @@ test('startet dasselbe Profil nach vollständigem Schließen ohne Netz und kassi
     )
   } finally {
     await profil.close()
-    if (verzeichnis.startsWith(resolve(tmpdir(), 'kassenprofil-')))
+    if (verzeichnis.startsWith(resolve(testTmp, 'kassenprofil-')))
       await rm(verzeichnis, { recursive: true, force: true, maxRetries: 3 })
   }
 })
@@ -175,6 +176,7 @@ test('wartet auf vollständigen Precache und übernimmt Updates erst nach der of
   })
   try {
     const page = await context.newPage()
+    await page.setViewportSize({ width: 1024, height: 600 })
     await einrichten(page)
     await expect(
       page.getByText('Offline-Bereitschaft ausstehend'),
@@ -183,15 +185,17 @@ test('wartet auf vollständigen Precache und übernimmt Updates erst nach der of
     await expect(
       page.getByText('Offline bereit', { exact: true }),
     ).toBeVisible()
-    await taste(page, /^Glühwein rot 0/).click()
+    await taste(page, /^Glühwein rot \d/).click()
     revision++
     await page.evaluate(async () => {
       await (await navigator.serviceWorker.ready).update()
     })
     const update = taste(page, 'Update übernehmen')
     await expect(update).toBeDisabled()
+    expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true)
+    await expect(taste(page, 'Zur Zahlung')).toBeInViewport({ ratio: 1 })
     await expect(
-      page.locator('.bestellung').getByText('5,50 € kassieren'),
+      page.locator('.bestellung').getByText('9,00 € kassieren'),
     ).toBeVisible()
     await abschliessen(page)
     await expect(update).toBeEnabled()

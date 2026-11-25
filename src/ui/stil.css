@@ -3,9 +3,21 @@
 }
 :root {
   font-family: 'Source Sans 3', system-ui, sans-serif;
-  color: #2b2423;
-  background: #f5f1ea;
+  color: var(--text);
+  background: var(--hintergrund);
   line-height: 1.45;
+  color-scheme: light;
+  --text: #2b2423;
+  --hintergrund: #f5f1ea;
+  --flaeche: #fffdf8;
+  --rand: #ded6ca;
+  --tastenrand: #a99c90;
+  --hover: #f6ebe8;
+  --fokus: #286895;
+  --akzent: #65283b;
+  --sekundaer: #5b5050;
+  --auszahlung: #ad2038;
+  --auszahlungsgrund: #fbe5e8;
 }
 body {
   margin: 0;
@@ -75,8 +87,8 @@ h2 {
 }
 nav,
 .summenleiste {
-  background: #fffdf8;
-  border-block-end: 1px solid #ded6ca;
+  background: var(--flaeche);
+  border-block-end: 1px solid var(--rand);
 }
 main {
   padding-block: 1rem;
@@ -95,9 +107,9 @@ details {
 section,
 .einrichtung form {
   padding: 1rem;
-  border: 1px solid #ded6ca;
+  border: 1px solid var(--rand);
   border-radius: 0.8rem;
-  background: #fffdf8;
+  background: var(--flaeche);
 }
 section > h3:first-child {
   margin-top: 0;
@@ -114,22 +126,24 @@ summary {
   cursor: pointer;
 }
 button {
+  appearance: none;
+  -webkit-appearance: none;
   border-radius: 0.5rem;
-  border: 1px solid #b9ada2;
-  background: #fffdf8;
-  color: #432c32;
+  border: 1px solid var(--tastenrand);
+  background: var(--flaeche);
+  color: var(--text);
   padding: 0.65rem 0.9rem;
   font-weight: 600;
   margin: 0.15rem;
 }
 button:hover:enabled {
-  background: #f6ebe8;
+  background: var(--hover);
 }
 button:focus-visible,
 input:focus-visible,
 summary:focus-visible,
 select:focus-visible {
-  outline: 3px solid #286895;
+  outline: 3px solid var(--fokus);
   outline-offset: 2px;
 }
 button:disabled {
@@ -155,9 +169,10 @@ select {
   width: 100%;
   min-width: 0;
   padding: 0.55rem;
-  border: 1px solid #aa9d93;
+  border: 1px solid var(--tastenrand);
   border-radius: 0.35rem;
-  background: white;
+  background: var(--flaeche);
+  color: var(--text);
 }
 .check {
   display: flex;
@@ -196,14 +211,14 @@ select {
   font-weight: 400;
 }
 .produkt span {
-  color: #65283b;
+  color: var(--akzent);
 }
 .aktionen {
   flex-wrap: wrap;
 }
 .position,
 .artikelliste li {
-  border-bottom: 1px solid #ded6ca;
+  border-bottom: 1px solid var(--rand);
   padding-block: 0.65rem;
 }
 .position > span {
@@ -237,8 +252,8 @@ body:has(.summenleiste) {
 }
 .fehler,
 .warnung {
-  color: #702431;
-  background: #fae9de;
+  color: var(--auszahlung);
+  background: var(--auszahlungsgrund);
   padding: 0.8rem;
 }
 .artikelliste {
@@ -253,20 +268,20 @@ table {
 td,
 th {
   padding: 0.4rem 0.2rem;
-  border-bottom: 1px solid #ded6ca;
+  border-bottom: 1px solid var(--rand);
 }
 footer {
   font-size: 0.85rem;
-  color: #5b5050;
+  color: var(--sekundaer);
 }
-.bestellsumme { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 800; line-height: 1.2; color: #542335; }
+.bestellsumme { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 800; line-height: 1.2; color: var(--akzent); }
 .minus-pfand { width: 100%; margin: 1rem 0 0; min-height: 4.5rem; background: #8b293b; color: white; border-color: #8b293b; font-size: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
 .minus-pfand:hover:enabled { background: #6a1c2c; }
-.bestellung-loeschen { display: block; width: 100%; margin: 1rem 0; min-height: 3.5rem; color: #7b2435; border: 2px solid #9e4859; font-size: 1.1rem; }
+.bestellung-loeschen { display: block; width: 100%; margin: 1rem 0; min-height: 3.5rem; color: var(--auszahlung); border: 2px solid #9e4859; font-size: 1.1rem; }
 .zahlungsseite { max-width: 72rem; margin: auto; }
 .zahlungszusammenfassung { font-size: 1.25rem; }
 .zahlungsposition { display: flex; justify-content: space-between; gap: 1rem; padding: .3rem 0; }
-.rueckgeld { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; color: #195a3c; background: #ddf2e3; padding: .8rem 1rem; border-radius: .6rem; }
+.rueckgeld { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; color: var(--auszahlung); background: var(--auszahlungsgrund); padding: .8rem 1rem; border-radius: .6rem; }
 .zahlungsseite .gross { font-size: 2rem; font-weight: 800; }
 [hidden] { display: none !important; }
 @media (min-width: 48rem) {
@@ -278,4 +293,73 @@ footer {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
   }
+}
+
+:root[data-theme='dunkel'] {
+  color-scheme: dark;
+  --text: #f5eee5;
+  --hintergrund: #18191d;
+  --flaeche: #25262c;
+  --rand: #484950;
+  --tastenrand: #87848a;
+  --hover: #38313b;
+  --fokus: #8dc9ff;
+  --akzent: #f4c1d0;
+  --sekundaer: #c4bec8;
+  --auszahlung: #ff8da0;
+  --auszahlungsgrund: #40222d;
+}
+.kopf { justify-content: start; flex-wrap: wrap; gap: .6rem; }
+.kopf nav { flex: 1; min-width: 0; padding: 0; background: transparent; color: inherit; border: 0; }
+.kopf nav strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kopf button { min-height: 48px; padding: .4rem .7rem; margin: 0; }
+.theme-schalter { margin-left: auto !important; }
+.hauptprodukte { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; margin-bottom: .6rem; }
+.hauptprodukte .produkt { min-height: 7.5rem; font-size: 1.15rem; }
+button.gluehwein-rot { background: #792c44; color: #fff; border-color: #792c44; }
+button.gluehwein-rot:hover:enabled { background: #602036; }
+button.gluehwein-weiss { background: #f0d382; color: #382805; border-color: #957023; }
+button.gluehwein-weiss:hover:enabled { background: #e4c268; }
+.gluehwein-rot span, .gluehwein-weiss span { color: inherit; }
+.produkt > * { position: relative; z-index: 1; }
+.auszahlung { color: var(--auszahlung) !important; }
+.bestellpositionen:focus-visible { outline: 3px solid var(--fokus); outline-offset: 2px; }
+.bestellung > [role='status']:empty { display: none; }
+@media (max-width: 47.99rem) {
+  .kopf .marke { flex: 1; }
+  .kopf nav { flex-basis: 100%; order: 3; }
+  .hauptprodukte { grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr)); }
+}
+@media (min-width: 48rem) and (orientation: landscape) {
+  body:has(.kassenansicht:not([hidden]) .kassenhaupt) { padding-bottom: 0; }
+  #root:has(.kassenansicht:not([hidden]) .kassenhaupt) {
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+  .kassenansicht:not([hidden]):has(.kassenhaupt) { flex: 1; min-height: 0; display: flex; }
+  .kassenhaupt { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: .5rem max(.6rem, calc((100vw - 80rem) / 2)); gap: .5rem; }
+  .kassenraster { flex: 1; min-height: 0; align-items: stretch; gap: .6rem; }
+  .kassenraster > section { min-height: 0; margin: 0; padding: .65rem; }
+  .kassenraster h2 { font-size: 1.45rem; margin: 0 0 .5rem; }
+  .sortiment { display: flex; flex-direction: column; }
+  .produkte { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; }
+  .produkte .produkt { min-height: 5.3rem; padding: .4rem .5rem; }
+  .hauptprodukte .produkt { min-height: 6.5rem; padding: .6rem; }
+  .minus-pfand { margin-top: auto; min-height: 3.5rem; padding: .5rem .7rem; font-size: 1.3rem; }
+  .bestellung { display: flex; flex-direction: column; gap: .4rem; }
+  .bestellsumme { margin: 0 0 .3rem; font-size: 1.8rem; }
+  .bestellpositionen { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: .2rem; }
+  .position { padding-block: .4rem; }
+  .position .aktionen { gap: .2rem; }
+  .position button { margin: 0; padding: .3rem .6rem; }
+  .bestellung dl { margin: .2rem 0; gap: .2rem; }
+  .bestellung > button { margin: 0; padding: .4rem; min-height: 48px; }
+  .bestellung > [role='status'] { margin: 0; }
+  .kassenhaupt .summenleiste { position: static; flex-shrink: 0; padding: .3rem .65rem max(.3rem, env(safe-area-inset-bottom)); border-radius: .6rem; }
+  #root:has(.kassenhaupt) > footer { padding: .15rem max(.6rem, calc((100vw - 80rem) / 2)); }
+  #root:has(.kassenhaupt) > footer p { display: inline; margin: 0; }
+  #root:has(.kassenhaupt) > footer button { min-height: 48px; padding: .25rem .5rem; margin-block: 0; }
+  #root:has(.kassenhaupt) > aside, #root:has(.kassenhaupt) > p { margin: 0; padding-block: .2rem; flex-shrink: 0; }
 }

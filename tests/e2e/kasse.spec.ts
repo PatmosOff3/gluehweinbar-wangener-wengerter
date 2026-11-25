@@ -15,8 +15,8 @@ test('prüft Ersteinrichtung, Zugang, Mengentasten, Rückgeld, Auszahlung und Do
   await taste(page, 'Kasse einrichten').click()
   await expect(taste(page, 'Admin-Bereich')).toHaveCount(0)
   await einrichten(page)
-  const rot = taste(page, /^Glühwein rot 0/)
-  const weiss = taste(page, /^Glühwein weiß 0/)
+  const rot = taste(page, /^Glühwein rot \d/)
+  const weiss = taste(page, /^Glühwein weiß \d/)
   await rot.click()
   await taste(page, /^− Pfand/).click()
   await taste(page, 'Bestellung leeren').click()
@@ -27,7 +27,7 @@ test('prüft Ersteinrichtung, Zugang, Mengentasten, Rückgeld, Auszahlung und Do
   await taste(page, 'Glühwein rot verringern').click()
   await taste(page, 'Glühwein weiß entfernen').click()
   await expect(
-    page.locator('.bestellung').getByText('5,50 € kassieren'),
+    page.locator('.bestellung').getByText('9,00 € kassieren'),
   ).toBeVisible()
   await taste(page, 'Zur Zahlung').click()
   await expect(page.locator('.zahlungszusammenfassung')).toContainText(
@@ -41,14 +41,14 @@ test('prüft Ersteinrichtung, Zugang, Mengentasten, Rückgeld, Auszahlung und Do
   await expect(page.getByText(/reicht nicht aus/)).toBeVisible()
   await expect(taste(page, 'Vorgang abschließen')).toBeDisabled()
   await taste(page, '10 €').click()
-  await expect(page.getByText('4,50 € Rückgeld')).toBeVisible()
+  await expect(page.getByText('1,00 € Rückgeld')).toBeVisible()
   await taste(page, 'Anderer Betrag').click()
   await expect(page.getByLabel('Erhaltenes Bargeld (€)')).toBeFocused()
   await expect(page.getByLabel('Erhaltenes Bargeld (€)')).toHaveAttribute(
     'inputmode',
     'decimal',
   )
-  await page.getByLabel('Erhaltenes Bargeld (€)').fill('6,00')
+  await page.getByLabel('Erhaltenes Bargeld (€)').fill('9,50')
   await expect(page.getByText('0,50 € Rückgeld')).toBeVisible()
   await taste(page, 'Vorgang abschließen').evaluate((button) => {
     ;(button as HTMLButtonElement).click()
@@ -57,7 +57,7 @@ test('prüft Ersteinrichtung, Zugang, Mengentasten, Rückgeld, Auszahlung und Do
   await expect(page.getByText('Vorgang 1 gebucht.')).toBeVisible()
   await taste(page, /^− Pfand/).click()
   await expect(
-    page.locator('.bestellung').getByText('2,00 € auszahlen'),
+    page.locator('.bestellung').getByText('5,00 € auszahlen'),
   ).toBeVisible()
   await abschliessen(page, '')
   await expect(page.getByText('Vorgang 2 gebucht.')).toBeVisible()
@@ -100,17 +100,17 @@ test('rechnet vier Gläser ab und prüft Offline-CSV, Storno, Sicherung und Wied
   await page.evaluate(() => navigator.serviceWorker.ready)
   await context.setOffline(true)
   await page.reload()
-  await taste(page, /^Glühwein rot 0/).click()
-  await taste(page, /^Glühwein weiß 0/).click()
+  await taste(page, /^Glühwein rot \d/).click()
+  await taste(page, /^Glühwein weiß \d/).click()
   const minus = taste(page, /^− Pfand/)
   await minus.click()
   await minus.click()
   await minus.click()
   await minus.click()
   await expect(
-    page.locator('.bestellung').getByText('3,00 € kassieren'),
+    page.locator('.bestellung').getByText('2,00 € auszahlen'),
   ).toBeVisible()
-  await abschliessen(page)
+  await abschliessen(page, '')
   await admin(page)
   const download = page.waitForEvent('download')
   await taste(page, 'CSV herunterladen').click()
@@ -118,11 +118,11 @@ test('rechnet vier Gläser ab und prüft Offline-CSV, Storno, Sicherung und Wied
   const inhalt = await readFile((await datei.path())!, 'utf8')
   expect(inhalt.split('\r\n').filter(Boolean)).toHaveLength(6)
   for (const zeile of [
-    '"Winterfest";"Glühwein rot";"0,2 l";"1";"3,50"',
-    '"Glühwein weiß";"0,2 l";"1";"3,50"',
-    '"Warenumsatz";"";"";"7,00"',
+    '"Winterfest";"Glühwein rot";"";"1";"4,00"',
+    '"Glühwein weiß";"";"1";"4,00"',
+    '"Warenumsatz";"";"";"8,00"',
     '"Eingenommenes Pfand";"";"";"0,00"',
-    '"Ausgezahltes Pfand";"";"";"4,00"',
+    '"Ausgezahltes Pfand";"";"";"10,00"',
   ])
     expect(inhalt).toContain(zeile)
   const sicherung = page.waitForEvent('download')
@@ -178,7 +178,7 @@ test('rechnet vier Gläser ab und prüft Offline-CSV, Storno, Sicherung und Wied
   ).toBeVisible()
   await expect(
     page.locator('dt').filter({ hasText: 'Warenumsatz' }).locator('+ dd'),
-  ).toHaveText('7,00 €')
+  ).toHaveText('8,00 €')
   expect(fremd).toEqual([])
 })
 test('verwendet große erreichbare Tasten und passt die Kasse an den Viewport an', async ({
@@ -187,7 +187,7 @@ test('verwendet große erreichbare Tasten und passt die Kasse an den Viewport an
   await einrichten(page)
   for (const width of [320, 1100]) {
     await page.setViewportSize({ width, height: 660 })
-    await expect(taste(page, /^Glühwein rot 0/)).toBeVisible()
+    await expect(taste(page, /^Glühwein rot \d/)).toBeVisible()
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,

@@ -7,6 +7,7 @@ import { db } from '../src/storage/db'
 
 it('verlangt einen gültigen Veranstaltungsnamen, eine PIN, Pfand und ein bestätigtes Sortiment', async () => {
   render(<Einrichtung />)
+  expect((screen.getByLabelText('Pfand pro Gefäß (€)') as HTMLInputElement).value).toBe('5,00')
   const knopf = screen.getByRole('button', { name: 'Kasse einrichten' })
   const form = knopf.closest('form')!
   fireEvent.click(knopf)

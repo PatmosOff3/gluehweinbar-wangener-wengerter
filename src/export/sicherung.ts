@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { barzahlung, berechnen, type Buchung } from '../domain/kasse'
 import type { KassenDB } from '../storage/db'
+import { finalePreisliste } from '../application/kasse'
 
 const zahl = z.number().int().nonnegative()
 const id = z.uuid()
@@ -60,7 +61,13 @@ const tabellen = z.object({
       naechsteNummer: zahl.positive(),
     }),
   ),
-  eventSettings: z.array(z.object({ eventId: id, pfand: zahl })),
+  eventSettings: z.array(
+    z.object({
+      eventId: id,
+      pfand: zahl,
+      sortimentsstand: z.literal('weihnachtsmarkt-2026-final').optional(),
+    }),
+  ),
   products: z.array(produkt),
   transactions: z.array(buchung),
 })
@@ -243,5 +250,6 @@ export async function wiederherstellen(
       await t.clear()
       await t.bulkAdd(daten[t.name as keyof Daten])
     }
+    await finalePreisliste(db)
   })
 }

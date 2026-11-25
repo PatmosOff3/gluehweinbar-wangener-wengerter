@@ -7,6 +7,7 @@ import {
   geld,
   schnellbetraege,
   type Bestand,
+  type Produkt,
 } from '../domain/kasse'
 import { neueId, sortiment, verkaufen } from '../application/kasse'
 import { db } from '../storage/db'
@@ -35,6 +36,11 @@ export function Kasse({
   const [zahlung, bezahlen] = useState<Bestand>()
   const [meldung, melden] = useState('')
   const produkte = daten?.produkte.filter((p) => p.aktiv) ?? []
+  const prioritaet = ['Glühwein rot', 'Glühwein weiß', 'Bier']
+  const hauptprodukte = produkte
+    .filter((p) => prioritaet.includes(p.name))
+    .sort((a, b) => prioritaet.indexOf(a.name) - prioritaet.indexOf(b.name))
+  const weitere = produkte.filter((p) => !prioritaet.includes(p.name))
   const zeilen = produkte
     .filter((p) => mengen[p.id] > 0)
     .map((artikel) => ({ artikel, menge: mengen[artikel.id] }))
@@ -76,26 +82,30 @@ export function Kasse({
         }}
       />
     )
+  function produkttaste(p: Produkt) {
+    const farbe = p.name === 'Glühwein rot' ? ' gluehwein-rot'
+      : p.name === 'Glühwein weiß' ? ' gluehwein-weiss' : ''
+    return (
+      <button
+        key={p.id}
+        className={'produkt' + (p.pflicht ? ' mit-pfand' : '') + farbe}
+        onClick={() => menge(p.id, (mengen[p.id] ?? 0) + 1)}
+      >
+        <strong>{p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}</strong>
+        {p.einheit && <small>{p.einheit}</small>}
+        <span>{geld(p.preis)}</span>
+      </button>
+    )
+  }
   return (
-    <main>
+    <main className="kassenhaupt">
       <div className="kassenraster">
-        <section>
+        <section className="sortiment">
           <h2>Sortiment</h2>
-          <div className="produkte">
-            {produkte.map((p) => (
-              <button
-                key={p.id}
-                className={'produkt' + (p.pflicht ? ' mit-pfand' : '')}
-                onClick={() => menge(p.id, (mengen[p.id] ?? 0) + 1)}
-              >
-                <strong>
-                  {p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}
-                </strong>
-                <small>{p.einheit}</small>
-                <span>{geld(p.preis)}</span>
-              </button>
-            ))}
-          </div>
+          {hauptprodukte.length > 0 && (
+            <div className="hauptprodukte">{hauptprodukte.map(produkttaste)}</div>
+          )}
+          <div className="produkte">{weitere.map(produkttaste)}</div>
           <button
             className="minus-pfand"
             onClick={() => minusSetzen((v) => v + 1)}
@@ -105,40 +115,47 @@ export function Kasse({
         </section>
         <section className="bestellung">
           <h2>Offene Bestellung</h2>
-          <p className="bestellsumme">
+          <p className={'bestellsumme' + (b.summe < 0 ? ' auszahlung' : '')}>
             {geld(Math.abs(b.summe))} {b.summe < 0 ? 'auszahlen' : 'kassieren'}
           </p>
-          {!offen && <p>Noch keine Artikel oder Rückgaben.</p>}
-          {b.positionen.map((p) => (
-            <div className="position" key={p.id}>
-              <strong>
-                {p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}{' '}
-                <small>{p.einheit}</small>
-              </strong>
-              <span>
-                {p.menge} × {geld(p.preis)}
-              </span>
-              <div className="aktionen">
-                <button
-                  aria-label={p.name + ' verringern'}
-                  onClick={() => menge(p.id, p.menge - 1)}
-                >
-                  −
-                </button>
-                <button
-                  aria-label={p.name + ' entfernen'}
-                  onClick={() => menge(p.id, 0)}
-                >
-                  Entfernen
-                </button>
+          <div
+            className="bestellpositionen"
+            tabIndex={0}
+            role="region"
+            aria-label="Bestellpositionen"
+          >
+            {!offen && <p>Noch keine Artikel oder Rückgaben.</p>}
+            {b.positionen.map((p) => (
+              <div className="position" key={p.id}>
+                <strong>
+                  {p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}{' '}
+                  {p.einheit && <small>{p.einheit}</small>}
+                </strong>
+                <span>
+                  {p.menge} × {geld(p.preis)}
+                </span>
+                <div className="aktionen">
+                  <button
+                    aria-label={p.name + ' verringern'}
+                    onClick={() => menge(p.id, p.menge - 1)}
+                  >
+                    −
+                  </button>
+                  <button
+                    aria-label={p.name + ' entfernen'}
+                    onClick={() => menge(p.id, 0)}
+                  >
+                    Entfernen
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
           <dl>
             <dt>Automatisches Pfand · {b.automatisch}×</dt>
             <dd>{geld(b.automatisch * b.pfand)}</dd>
             <dt>− Pfand · {minus}×</dt>
-            <dd>{geld(-minus * b.pfand)}</dd>
+            <dd className={minus > 0 ? 'auszahlung' : ''}>{geld(-minus * b.pfand)}</dd>
           </dl>
           {minus > 0 && (
             <button onClick={() => minusSetzen((v) => v - 1)}>
@@ -160,7 +177,7 @@ export function Kasse({
         </section>
       </div>
       <div className="summenleiste">
-        <strong>
+        <strong className={b.summe < 0 ? 'auszahlung' : ''}>
           {geld(Math.abs(b.summe))} {b.summe < 0 ? 'auszahlen' : 'kassieren'}
         </strong>
         <button
@@ -200,7 +217,7 @@ function Zahlung({
     hinweis =
       bestand.summe > 0
         ? geld(bar.rueckgeld) + ' Rückgeld'
-        : 'Kein erhaltenes Bargeld erforderlich.'
+        : ''
     gueltig = true
   } catch (e) {
     hinweis = (e as Error).message
@@ -224,12 +241,12 @@ function Zahlung({
           <dt>Automatisches Pfand · {bestand.automatisch}×</dt>
           <dd>{geld(bestand.automatisch * bestand.pfand)}</dd>
           <dt>− Pfand · {bestand.vorhanden + bestand.rueckgaben}×</dt>
-          <dd>
+          <dd className={bestand.vorhanden + bestand.rueckgaben > 0 ? 'auszahlung' : ''}>
             {geld(-(bestand.vorhanden + bestand.rueckgaben) * bestand.pfand)}
           </dd>
         </dl>
       </section>
-      <p className="gross">
+      <p className={'gross' + (bestand.summe < 0 ? ' auszahlung' : '')}>
         {geld(Math.abs(bestand.summe))}{' '}
         {bestand.summe < 0 ? 'auszahlen' : 'kassieren'}
       </p>

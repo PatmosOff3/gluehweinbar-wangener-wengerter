@@ -26,11 +26,11 @@ it.each([320, 1100])(
     await db.open()
     const id = await einrichten(db, 'Testfest', 200, testPin)
     render(<Kasse eventId={id} offenMelden={() => {}} />)
-    const rot = await screen.findByRole('button', { name: /Glühwein rot 0/ })
+    const rot = await screen.findByRole('button', { name: /Glühwein rot 4/ })
     fireEvent.click(rot)
     expect(
       screen.getByRole('heading', { name: 'Offene Bestellung' }),
     ).toBeTruthy()
-    expect(screen.getAllByText('5,50 € kassieren')).toHaveLength(2)
+    expect(screen.getAllByText('6,00 € kassieren')).toHaveLength(2)
   },
 )

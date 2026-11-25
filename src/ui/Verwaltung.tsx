@@ -46,7 +46,7 @@ function ProduktForm({
         />
       </label>
       <label>
-        Verkaufseinheit
+        Verkaufseinheit (optional)
         <input
           value={p.einheit}
           onChange={(e) => setzen({ ...p, einheit: e.target.value })}
@@ -244,7 +244,7 @@ export function Verwaltung({ aktivId }: { aktivId: string }) {
             <dt>Eingenommenes Pfand</dt>
             <dd>{geld(s.eingenommen)}</dd>
             <dt>Ausgezahltes Pfand</dt>
-            <dd>{geld(s.ausgezahlt)}</dd>
+            <dd className={s.ausgezahlt > 0 ? 'auszahlung' : ''}>{geld(s.ausgezahlt)}</dd>
           </dl>
           <h3>CSV-Abrechnung</h3>
           <p>
