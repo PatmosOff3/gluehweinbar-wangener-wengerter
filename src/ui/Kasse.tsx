@@ -54,15 +54,15 @@ export function Kasse({
   const [rueckblick, letzteAnzeigen] = useState(false)
   const letzte = daten?.buchungen.filter((p) => p.art === 'verkauf').at(-1)
   const [meldung, melden] = useState('')
-  const [gebucht, buchungBestaetigen] = useState(false)
+  const [bestaetigungsdauer, setzeBestaetigungsdauer] = useState(0)
   useEffect(() => {
-    if (!gebucht) return
+    if (!bestaetigungsdauer) return
     const timer = window.setTimeout(() => {
       bezahlen(undefined)
-      buchungBestaetigen(false)
-    }, 800)
+      setzeBestaetigungsdauer(0)
+    }, bestaetigungsdauer)
     return () => window.clearTimeout(timer)
-  }, [gebucht])
+  }, [bestaetigungsdauer])
   const produkte = daten?.produkte.filter((p) => p.aktiv) ?? []
   const prioritaet = ['Glühwein rot', 'Glühwein weiß', 'Bier']
   const hauptprodukte = produkte
@@ -105,12 +105,13 @@ export function Kasse({
         produkte={daten.produkte}
         bestand={zahlung}
         zurueck={() => bezahlen(undefined)}
-        erfolgsmeldung={gebucht ? meldung : ''}
-        buchen={async (gegeben, id, zahlungsart) => {
-          const buchung = await verkaufen(db, eventId, id, zahlung, gegeben, zahlungsart)
+        bestaetigungsdauer={bestaetigungsdauer}
+        erfolgsmeldung={bestaetigungsdauer ? meldung : ''}
+        buchen={async (gegeben, id, abschluss) => {
+          const buchung = await verkaufen(db, eventId, id, zahlung, gegeben, abschluss === 'passend' ? 'bar' : abschluss)
           setzen({})
           minusSetzen(0)
-          buchungBestaetigen(true)
+          setzeBestaetigungsdauer(abschluss === 'passend' ? 800 : 400)
           melden('Vorgang ' + buchung.nummer + ' gebucht.')
         }}
       />
@@ -256,12 +257,13 @@ function LetzteBestellung({ buchung, storniert, zurueck }: { buchung: Buchung; s
   </main>
 }
 
-function ZahlungsPopup({ children, titel, schliessen, gesperrt = false, klasse = '' }: {
+function ZahlungsPopup({ children, titel, schliessen, gesperrt = false, klasse = '', animationsdauer }: {
   children: ReactNode
   titel: string
   schliessen?: () => void
   gesperrt?: boolean
   klasse?: string
+  animationsdauer?: number
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
   useEffect(() => {
@@ -269,7 +271,7 @@ function ZahlungsPopup({ children, titel, schliessen, gesperrt = false, klasse =
     element?.showModal()
     return () => element?.close()
   }, [])
-  return <dialog ref={dialog} className={'zahlungs-popup ' + klasse} aria-labelledby={titel} onCancel={(e) => {
+  return <dialog ref={dialog} className={'zahlungs-popup ' + klasse} style={animationsdauer ? { animationDuration: animationsdauer + 'ms' } : undefined} aria-labelledby={titel} onCancel={(e) => {
     e.preventDefault()
     if (!gesperrt) schliessen?.()
   }}>{children}</dialog>
@@ -370,12 +372,14 @@ function Zahlung({
   zurueck,
   buchen,
   erfolgsmeldung,
+  bestaetigungsdauer,
 }: {
   bestand: Bestand
   produkte: Produkt[]
   zurueck: () => void
-  buchen: (gegeben: number, id: string, zahlungsart?: Zahlungsart) => Promise<void>
+  buchen: (gegeben: number, id: string, abschluss?: Zahlungsart | 'passend') => Promise<void>
   erfolgsmeldung: string
+  bestaetigungsdauer: number
 }) {
   const [id] = useState(neueId)
   const [wahl, waehlen] = useState<number | 'frei' | undefined>()
@@ -439,7 +443,7 @@ function Zahlung({
             ))}
           </div>
           <div className="zahlungsoptionen">
-            <button disabled={aktion.beschaeftigt || !!erfolgsmeldung} onClick={() => void aktion.ausfuehren(() => buchen(bestand.summe, id))}>Passend</button>
+            <button disabled={aktion.beschaeftigt || !!erfolgsmeldung} onClick={() => void aktion.ausfuehren(() => buchen(bestand.summe, id, 'passend'))}>Passend</button>
             <button
               aria-pressed={wahl === 'frei'}
               disabled={aktion.beschaeftigt}
@@ -468,7 +472,7 @@ function Zahlung({
       >
         {bestand.summe > 0 ? 'Rückgeld anzeigen' : 'Vorgang abschließen'}
       </button>
-      {erfolgsmeldung && <ZahlungsPopup titel="buchung-erfolg" klasse="erfolgs-popup">
+      {erfolgsmeldung && <ZahlungsPopup titel="buchung-erfolg" klasse="erfolgs-popup" animationsdauer={bestaetigungsdauer}>
         <span className="erfolgs-haken" aria-hidden="true">✓</span>
         <h2 id="buchung-erfolg">{erfolgsmeldung}</h2>
       </ZahlungsPopup>}

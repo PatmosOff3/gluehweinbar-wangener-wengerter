@@ -69,6 +69,7 @@ test('zeigt Rückgeld im Dialog und die letzte bezahlte Bestellung ohne erneute 
   const erfolg = page.getByRole('dialog', { name: 'Vorgang 1 gebucht.' })
   await expect(erfolg).toBeVisible()
   await expect(erfolg).toHaveCSS('animation-name', 'none')
+  await expect(erfolg).toHaveCSS('animation-duration', '0.8s')
   await expect(dialog).toHaveCount(0)
   await expect(taste(page, 'Zur Zahlung')).toBeDisabled()
 
@@ -85,7 +86,7 @@ test('zeigt Rückgeld im Dialog und die letzte bezahlte Bestellung ohne erneute 
   await taste(page, '20 €').click()
   await expect(dialog).toContainText('11,00 € Rückgeld')
   await abschluss.click()
-  await expect(page.getByRole('dialog', { name: 'Vorgang 2 gebucht.' })).toBeVisible()
+  await expect(page.getByRole('dialog', { name: 'Vorgang 2 gebucht.' })).toHaveCSS('animation-duration', '0.4s')
   await page.reload()
   await taste(page, 'Zur letzten Bestellung').click()
   await expect(page.getByRole('heading', { name: 'Letzte Bestellung · Vorgang 2' })).toBeVisible()

@@ -399,7 +399,7 @@ button.gluehwein-weiss:hover:enabled { background: #e4c268; }
 .erfolgs-haken { display: inline-grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 50%; background: #16623b; color: white; font-size: 2rem; }
 .erfolgs-popup h2 { margin: .6rem 0 0; font: 650 1.25rem/1.3 system-ui, sans-serif; }
 @media (prefers-reduced-motion: no-preference) {
-  .erfolgs-popup[open] { animation: zahlung-bestaetigt .8s ease-in-out both; }
+  .erfolgs-popup[open] { animation-name: zahlung-bestaetigt; animation-timing-function: ease-in-out; animation-fill-mode: both; }
   @keyframes zahlung-bestaetigt {
     from { opacity: 0; transform: translateY(.3rem); }
     15%, 85% { opacity: 1; transform: translateY(0); }
