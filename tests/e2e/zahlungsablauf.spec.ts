@@ -10,6 +10,7 @@ test('zeigt Rückgeld im Dialog und die letzte bezahlte Bestellung ohne erneute 
   await taste(page, '10 €').click()
   const dialog = page.getByRole('dialog', { name: 'Rückgeld', exact: true })
   await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole('button')).toHaveText(['Vorgang abschließen', 'Bargeld ändern', 'Zurück zur Bestellung'])
   await expect(dialog).toContainText('1,00 € Rückgeld')
   const abschluss = dialog.getByRole('button', { name: 'Vorgang abschließen' })
   const zurueck = dialog.getByRole('button', { name: 'Zurück zur Bestellung' })
@@ -18,10 +19,10 @@ test('zeigt Rückgeld im Dialog und die letzte bezahlte Bestellung ohne erneute 
   await zurueck.click()
   await expect(page.locator('.bestellsumme')).toHaveText('+ 9,00 €')
   await taste(page, 'Zur Zahlung').click()
-  await taste(page, 'Passend').click()
-  await expect(dialog).toContainText('0,00 € Rückgeld')
-  await abschluss.click()
+  await taste(page, 'Passend').evaluate((button: HTMLButtonElement) => { button.click(); button.click() })
   await expect(page.getByText('Vorgang 1 gebucht.')).toBeVisible()
+  await expect(dialog).toHaveCount(0)
+  await expect(taste(page, 'Zur Zahlung')).toBeDisabled()
 
   // Eine neue Bestellung bleibt beim Rückblick erhalten.
   await taste(page, /^Glühwein weiß \d/).click()

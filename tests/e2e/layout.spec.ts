@@ -7,6 +7,11 @@ test('hält das iPad-Layout in beiden Modi im Viewport und scrollt nur Bestellpo
   await einrichten(page)
   await expect(page.getByText('Offline bereit', { exact: true })).toBeVisible()
   await expect(page.locator('.produkt')).toHaveCount(11)
+  await expect(page.locator('.produkt abbr')).toHaveCount(9)
+  await expect(taste(page, /^Wein /).locator('[aria-hidden]')).toHaveText(['🍷', '🍷', '🍾'])
+  await expect(taste(page, /^Schnaps /).locator('[aria-hidden]')).toHaveText('🥃')
+  await expect(taste(page, /^Tresterbrand /).locator('[aria-hidden]')).toHaveText(['🍾', '🍾'])
+  expect((await taste(page, 'Zur Zahlung').boundingBox())!.height).toBeGreaterThanOrEqual(64)
   await expect(page.locator('.hauptprodukte .produkt strong')).toHaveText(['Glühwein rot', 'Glühwein weiß', 'Bier'])
   const haupt = (await page.locator('.hauptprodukte .produkt').first().boundingBox())!
   const normal = (await page.locator('.produkte .produkt').first().boundingBox())!
@@ -25,6 +30,9 @@ test('hält das iPad-Layout in beiden Modi im Viewport und scrollt nur Bestellpo
         await expect(button).toBeInViewport({ ratio: 1 })
         expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(48)
       }
+      const pfand = (await page.locator('.minus-pfand').boundingBox())!
+      const zahlleiste = (await page.locator('.summenleiste').boundingBox())!
+      expect(pfand.y + pfand.height).toBeLessThanOrEqual(zahlleiste.y)
     }
     for (const label of await page.locator('.hauptprodukte strong, .hauptprodukte span').all())
       await expect(label).toBeInViewport({ ratio: 1 })

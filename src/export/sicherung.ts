@@ -16,6 +16,8 @@ const artikel = z.object({
 })
 const position = artikel.extend({ menge: zahl.positive(), pfandJeStueck: zahl })
 const produkt = artikel.extend({
+  symbol: z.string().max(16).optional(),
+  alkohol: z.boolean().optional(),
   eventId: id,
   aktiv: z.boolean(),
   sortierung: zahl,

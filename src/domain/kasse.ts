@@ -37,6 +37,8 @@ export interface Artikel {
   pflicht: boolean
 }
 export interface Produkt extends Artikel {
+  symbol?: string
+  alkohol?: boolean
   eventId: string
   aktiv: boolean
   sortierung: number
@@ -148,9 +150,13 @@ export function auswerten(buchungen: Buchung[]) {
   >()
   let eingenommen = 0
   let ausgezahlt = 0
+  let ausgegebeneGefaesse = 0
+  let zurueckgenommeneGefaesse = 0
   let ware = 0
   for (const buchung of buchungen) {
     const faktor = buchung.art === 'storno' ? -1 : 1
+    ausgegebeneGefaesse = ganz(ausgegebeneGefaesse + faktor * (buchung.automatisch - buchung.vorhanden))
+    zurueckgenommeneGefaesse = ganz(zurueckgenommeneGefaesse + faktor * buchung.rueckgaben)
     eingenommen = ganz(eingenommen + faktor * buchung.eingenommen)
     ausgezahlt = ganz(ausgezahlt + faktor * buchung.ausgezahlt)
     ware = ganz(ware + faktor * buchung.ware)
@@ -169,6 +175,8 @@ export function auswerten(buchungen: Buchung[]) {
   }
   return {
     artikel: [...artikel.values()].filter((p) => p.menge !== 0),
+    ausgegebeneGefaesse,
+    zurueckgenommeneGefaesse,
     ware,
     eingenommen,
     ausgezahlt,

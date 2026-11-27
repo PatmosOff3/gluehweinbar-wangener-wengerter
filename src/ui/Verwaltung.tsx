@@ -13,6 +13,7 @@ import {
   wechseln,
 } from '../application/kasse'
 import { dezimal, euroEingabe, geld, type Produkt } from '../domain/kasse'
+import { kachelmerkmale } from '../domain/sortiment'
 import { csv, herunterladen } from '../export/dateien'
 import { Sicherungen } from './Sicherungen'
 import { Fehler, useAktion } from './formulare'
@@ -24,7 +25,7 @@ function ProduktForm({
   produkt: Produkt
   fertig: () => void
 }) {
-  const [p, setzen] = useState(produkt)
+  const [p, setzen] = useState(() => ({ ...produkt, ...kachelmerkmale(produkt) }))
   const [preis, eingeben] = useState(dezimal(p.preis))
   const aktion = useAktion()
   return (
@@ -60,6 +61,14 @@ function ProduktForm({
           inputMode="decimal"
           onChange={(e) => eingeben(e.target.value)}
         />
+      </label>
+      <label>
+        Produktsymbol (optional)
+        <input value={p.symbol} maxLength={16} onChange={(e) => setzen({ ...p, symbol: e.target.value })} />
+      </label>
+      <label className="check">
+        <input type="checkbox" checked={p.alkohol} onChange={(e) => setzen({ ...p, alkohol: e.target.checked })} />
+        Alkoholhaltig
       </label>
       {p.gruppe && (
         <p>Preis und Einheit gelten für roten und weißen Glühwein gemeinsam.</p>
@@ -242,9 +251,9 @@ export function Verwaltung({ aktivId }: { aktivId: string }) {
             <dt>Warenumsatz</dt>
             <dd>{geld(s.ware)}</dd>
             <dt>Eingenommenes Pfand</dt>
-            <dd>{geld(s.eingenommen)}</dd>
+            <dd>{geld(s.eingenommen)} · {s.ausgegebeneGefaesse} Gläser/Tassen</dd>
             <dt>Ausgezahltes Pfand</dt>
-            <dd className={s.ausgezahlt > 0 ? 'auszahlung' : ''}>{geld(s.ausgezahlt)}</dd>
+            <dd className={s.ausgezahlt > 0 ? 'auszahlung' : ''}>{geld(s.ausgezahlt)} · {s.zurueckgenommeneGefaesse} Gläser/Tassen</dd>
           </dl>
           <h3>CSV-Abrechnung</h3>
           <p>

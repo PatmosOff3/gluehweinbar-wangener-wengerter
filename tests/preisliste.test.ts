@@ -79,10 +79,13 @@ it('stellt alte Sicherungen vor dem nächsten Verkauf um und bewahrt spätere An
   await wiederherstellen(db, alt, true)
   expect((await db.eventSettings.get(id))?.pfand).toBe(500)
   await pfandSetzen(db, id, 700)
+  const honig = (await sortiment(db, id)).find((p) => p.name === 'Honig')!
+  await produktSpeichern(db, { ...honig, name: 'Met', alkohol: true, symbol: '🍷' })
   const neu = await sichern(db)
   await wiederherstellen(db, neu, true)
   await finalePreisliste(db)
   expect((await db.eventSettings.get(id))?.pfand).toBe(700)
+  expect(await db.products.get(honig.id)).toMatchObject({ name: 'Met', alkohol: true, symbol: '🍷' })
 })
 
 it('rollt eine fehlgeschlagene Umstellung einschließlich Marker zurück', async () => {

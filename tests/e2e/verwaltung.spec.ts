@@ -65,7 +65,7 @@ test('warnt im zweiten Fenster und verhindert Buchung in das abgeschlossene Fest
   await expect(taste(zweites, 'Zur Zahlung')).toBeInViewport({ ratio: 1 })
   await taste(zweites, /^Glühwein rot \d/).click()
   await taste(zweites, 'Zur Zahlung').click()
-  await taste(zweites, 'Passend').click()
+  await taste(zweites, '10 €').click()
   await admin(page)
   await page.getByLabel('Neuer Veranstaltungsname').fill('Zweites Fest')
   await taste(page, 'Neue Veranstaltung starten').click()

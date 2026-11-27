@@ -23,6 +23,6 @@ export async function admin(page: Page) {
 export async function abschliessen(page: Page, zahlung = 'Passend') {
   await taste(page, 'Zur Zahlung').click()
   if (zahlung) await taste(page, zahlung).click()
-  await taste(page, 'Vorgang abschließen').click()
+  if (zahlung !== 'Passend') await taste(page, 'Vorgang abschließen').click()
   await expect(page.getByText(/Vorgang \d+ gebucht/)).toBeVisible()
 }

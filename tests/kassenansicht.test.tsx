@@ -19,6 +19,25 @@ afterEach(async () => {
   await db.delete()
   vi.unstubAllGlobals()
 })
+it('behält eine passende Zahlung bei einem Schreibfehler und bucht beim erneuten Tipp genau einmal', async () => {
+  await db.open()
+  const id = await einrichten(db, 'Testfest', 500, testPin)
+  render(<Kasse eventId={id} offenMelden={() => {}} />)
+  fireEvent.click(await screen.findByRole('button', { name: /Glühwein rot 4/ }))
+  fireEvent.click(screen.getByRole('button', { name: 'Zur Zahlung' }))
+  const fehler = () => { throw new Error('Schreibfehler') }
+  db.transactions.hook('creating', fehler)
+  try {
+    fireEvent.click(screen.getByRole('button', { name: 'Passend' }))
+    expect((await screen.findByRole('alert')).textContent).toContain('Schreibfehler')
+    expect(await db.transactions.count()).toBe(0)
+  } finally {
+    db.transactions.hook('creating').unsubscribe(fehler)
+  }
+  fireEvent.click(screen.getByRole('button', { name: 'Passend' }))
+  await screen.findByText('Vorgang 1 gebucht.')
+  expect(await db.transactions.toArray()).toMatchObject([{ nummer: 1, gegeben: 900, rueckgeld: 0 }])
+})
 it.each([320, 1100])(
   'zeigt Artikel, Bestellung und Summe bei %i Pixeln',
   async (breite) => {

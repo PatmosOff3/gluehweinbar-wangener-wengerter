@@ -9,12 +9,16 @@ import {
   umkehr,
   type Buchung,
 } from '../src/domain/kasse'
-import { preisgruppe, standardsortiment } from '../src/domain/sortiment'
+import { kachelmerkmale, preisgruppe, standardsortiment } from '../src/domain/sortiment'
 
 const produkte = standardsortiment('fest', () => crypto.randomUUID())
 // Historische Rechenbeispiele bleiben unabhängig von den aktuellen Vorgaben.
 const rot = { ...produkte[0], preis: 350 }
 const weiss = { ...produkte[1], preis: 350 }
+it('ergänzt Kennzeichen für Altartikel und respektiert eigene Angaben', () => {
+  expect(kachelmerkmale({ ...rot, einheit: '0,25 l', symbol: undefined, alkohol: undefined })).toEqual({ symbol: '☕', alkohol: true })
+  expect(kachelmerkmale({ ...rot, symbol: '🍎', alkohol: false })).toEqual({ symbol: '🍎', alkohol: false })
+})
 const schorle = { ...produkte[7], preis: 250 }
 const runde = (artikel = rot, menge = 1, vorhanden = 0, rueck = 0) =>
   berechnen([{ artikel, menge }], 200, vorhanden, rueck)
@@ -54,7 +58,7 @@ it('prüft erhaltenes Bargeld, Schnellbeträge, freie Eingabe und Rückgeld', ()
   expect(barzahlung(-600, 0).gegeben).toBe(0)
 })
 it('summiert gebuchte Positionen und beide Pfandsummen unabhängig vom Wechselgeld', () => {
-  const bestellungen = [runde(), runde(weiss, 1, 1), runde(schorle, 1, 0, 2)]
+  const bestellungen = [runde(), runde(weiss, 1, 1), berechnen([{ artikel: schorle, menge: 1 }], 500, 0, 2)]
   const buchungen: Buchung[] = bestellungen.map((b, i) => ({
     ...b,
     ...barzahlung(b.summe, [1000, 350, 0][i]),
@@ -67,7 +71,9 @@ it('summiert gebuchte Positionen und beide Pfandsummen unabhängig vom Wechselge
   expect(auswerten(buchungen)).toMatchObject({
     ware: 950,
     eingenommen: 200,
-    ausgezahlt: 400,
+    ausgezahlt: 1000,
+    ausgegebeneGefaesse: 1,
+    zurueckgenommeneGefaesse: 2,
     artikel: [
       { name: rot.name, menge: 1, umsatz: 350 },
       { name: weiss.name, menge: 1, umsatz: 350 },
@@ -77,13 +83,15 @@ it('summiert gebuchte Positionen und beide Pfandsummen unabhängig vom Wechselge
   const storno = umkehr(buchungen[2], '4', 4, '2026-11-02')
   expect(auswerten([...buchungen, storno])).toMatchObject({
     ware: 700,
+    ausgegebeneGefaesse: 1,
+    zurueckgenommeneGefaesse: 0,
     eingenommen: 200,
     ausgezahlt: 0,
   })
   expect(storno.positionen[0]).not.toBe(buchungen[2].positionen[0])
   expect(
     auswerten([buchungen[1], umkehr(buchungen[1], '5', 5, '2026-11-02')]),
-  ).toEqual({ artikel: [], ware: 0, eingenommen: 0, ausgezahlt: 0 })
+  ).toEqual({ artikel: [], ware: 0, eingenommen: 0, ausgezahlt: 0, ausgegebeneGefaesse: 0, zurueckgenommeneGefaesse: 0 })
 })
 it('führt elf finale Artikel, getrennte Glühwein-IDs und einen gemeinsamen Preis', () => {
   expect(produkte).toHaveLength(11)

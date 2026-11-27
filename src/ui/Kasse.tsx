@@ -11,6 +11,7 @@ import {
   type Buchung,
 } from '../domain/kasse'
 import { neueId, sortiment, verkaufen } from '../application/kasse'
+import { kachelmerkmale } from '../domain/sortiment'
 import { db } from '../storage/db'
 import { Fehler, useAktion } from './formulare'
 
@@ -89,6 +90,7 @@ export function Kasse({
       />
     )
   function produkttaste(p: Produkt) {
+    const { symbol, alkohol } = kachelmerkmale(p)
     const farbe = p.name === 'Glühwein rot' ? ' gluehwein-rot'
       : p.name === 'Glühwein weiß' ? ' gluehwein-weiss' : ''
     return (
@@ -97,9 +99,15 @@ export function Kasse({
         className={'produkt' + (p.pflicht ? ' mit-pfand' : '') + farbe}
         onClick={() => menge(p.id, (mengen[p.id] ?? 0) + 1)}
       >
-        <strong>{p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}</strong>
+        <span className="produktname">
+          {symbol && <span aria-hidden="true">{symbol}</span>}
+          <strong>{p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}</strong>
+        </span>
         {p.einheit && <small>{p.einheit}</small>}
-        <span>{geld(p.preis)}</span>
+        <span className="produktzeile">
+          <span>{geld(p.preis)}</span>
+          {alkohol && <abbr title="Alkoholhaltig">Alk.</abbr>}
+        </span>
       </button>
     )
   }
@@ -114,7 +122,7 @@ export function Kasse({
           <div className="produkte">{weitere.map(produkttaste)}</div>
           <button
             className="minus-pfand"
-            onClick={() => minusSetzen((v) => v + 1)}
+            onClick={() => { minusSetzen((v) => v + 1); melden('') }}
           >
             − Pfand <span>− {geld(b.pfand)}</span>
           </button>
@@ -174,7 +182,10 @@ export function Kasse({
           >
             Bestellung leeren
           </button>
-          <p role="status">{meldung}</p>
+          <p role="status" className="buchungsmeldung">{meldung && <>
+            <span aria-hidden="true" className="buchungshaken">✓</span>{' '}
+            <span>{meldung}</span>
+          </>}</p>
         </section>
       </div>
       <div className="summenleiste">
@@ -184,7 +195,7 @@ export function Kasse({
         <div className="aktionen">
         <button disabled={!letzte} onClick={() => letzteAnzeigen(true)}>Zur letzten Bestellung</button>
         <button
-          className="primaer"
+          className="primaer zur-zahlung"
           disabled={!offen}
           onClick={() => bezahlen(b)}
         >
@@ -325,14 +336,15 @@ function Zahlung({
       </p>
       {bestand.summe > 0 && (
         <div className="geldwahl" role="group" aria-label="Erhaltenes Bargeld auswählen">
-          <button aria-pressed={wahl === bestand.summe} onClick={() => { waehlen(bestand.summe); popupZeigen(true) }}>Passend</button>
+          <button disabled={aktion.beschaeftigt} onClick={() => void aktion.ausfuehren(() => buchen(bestand.summe, id))}>Passend</button>
           {schnellbetraege.map((c) => (
-            <button key={c} aria-pressed={wahl === c} onClick={() => { waehlen(c); popupZeigen(true) }}>
+            <button key={c} disabled={aktion.beschaeftigt} aria-pressed={wahl === c} onClick={() => { waehlen(c); popupZeigen(true) }}>
               {c / 100} €
             </button>
           ))}
           <button
             aria-pressed={wahl === 'frei'}
+            disabled={aktion.beschaeftigt}
             onClick={() => {
               waehlen('frei')
               if (eingabe.current?.parentElement)
@@ -346,6 +358,7 @@ function Zahlung({
             Erhaltenes Bargeld (€)
             <input
               ref={eingabe}
+              disabled={aktion.beschaeftigt}
               type="text"
               inputMode="decimal"
               value={text}
@@ -377,8 +390,8 @@ function Zahlung({
         <p>Erhalten: {geld(gegeben)} · Gesamt: {geld(bestand.summe)}</p>
         <Fehler text={aktion.fehler} />
         <button className="primaer popup-abschluss" autoFocus disabled={!gueltig || aktion.beschaeftigt} onClick={() => void aktion.ausfuehren(() => buchen(gegeben, id))}>Vorgang abschließen</button>
-        <button className="popup-zurueck" disabled={aktion.beschaeftigt} onClick={zurueck}>Zurück zur Bestellung</button>
         <button className="popup-zurueck" disabled={aktion.beschaeftigt} onClick={() => popupZeigen(false)}>Bargeld ändern</button>
+        <button className="popup-zurueck" disabled={aktion.beschaeftigt} onClick={zurueck}>Zurück zur Bestellung</button>
       </ZahlungsPopup>}
     </main>
   )

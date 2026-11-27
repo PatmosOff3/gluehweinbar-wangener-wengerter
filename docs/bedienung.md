@@ -6,11 +6,11 @@
 
 ## Bargeld und Gefäße
 
-1. Tippe für jedes Stück einmal auf die Produkttaste. Roter und weißer Glühwein haben eigene Tasten. Wähle bei Wein die Ausschankgröße. In der offenen Bestellung kannst du Mengen verringern oder eine Position entfernen.
+1. Tippe für jedes Stück einmal auf die Produkttaste. Das Symbol rechts neben dem Namen unterscheidet Glas, Shot und Flasche. Prüfe bei Wein die Größe. „Alk.“ unten rechts kennzeichnet alkoholhaltige Getränke. In der offenen Bestellung kannst du Mengen verringern oder eine Position entfernen.
 2. Für eine neue Tasse zählt das Pfand automatisch. Für ein mitgebrachtes Gefäß tippe einmal „− Pfand“.
 3. Für jedes zusätzlich zurückgegebene leere Gefäß tippe ebenfalls „− Pfand“. Zusätzliche Abzüge zählen als ausgezahltes Pfand. Das funktioniert auch ohne Warenkauf. Über die Korrekturtaste in der Bestellung kannst du einen Pfandabzug zurücknehmen.
-4. Prüfe Betrag und Vorzeichen in der Summenleiste: Grün und „+“ stehen für Einnahmen, Rot und „−“ für Auszahlungen. Öffne „Zur Zahlung“. Wähle „Passend“ oder einen Schein: Das Rückgeld erscheint in einem Popup. Bei „Anderer Betrag“ gibst du das erhaltene Bargeld ein und tippst auf „Rückgeld anzeigen“. Bei einer Auszahlung gibst du den angezeigten Betrag heraus. Nullbeträge und Auszahlungen kannst du direkt abschließen.
-5. Gib das Rückgeld heraus und tippe im Popup auf den großen Button „Vorgang abschließen“. Warte auf die Meldung mit der Vorgangsnummer. „Zurück zur Bestellung“ führt ohne Buchung zurück; „Bargeld ändern“ schließt nur das Popup, damit du die erhaltene Summe korrigieren kannst.
+4. Prüfe Betrag und Vorzeichen in der Summenleiste und öffne „Zur Zahlung“. Hat der Gast passend bezahlt, tippe einmal auf „Passend“. Die Kasse bucht den Verkauf sofort. Ein Häkchen und die Vorgangsnummer bestätigen den Abschluss auf der leeren Kasse.
+5. Bei Wechselgeld wähle den erhaltenen Schein. Für einen freien Betrag wähle „Anderer Betrag“, gib die Summe ein und tippe auf „Rückgeld anzeigen“. Im Popup kannst du über „Bargeld ändern“ die Eingabe korrigieren oder zur Bestellung zurückkehren. Gib das Rückgeld heraus und tippe auf „Vorgang abschließen“. Nullbeträge und Auszahlungen schließt du direkt ab.
 6. Bei einem Fehler öffne den Admin-Bereich, entsperre ihn mit der PIN und wähle „Letzten Verkauf stornieren“. Prüfe die Nummer und bestätige. Die Auswertung berücksichtigt die Gegenbuchung sofort.
 
 **Kontrollbeispiel.** Ein roter und ein weißer Glühwein zu je 4,00 €, viermal „− Pfand“ für zwei vorhandene und zwei zurückgegebene Gläser zu je 5,00 € ergeben **2,00 € auszahlen**. Die Statistik enthält 8,00 € Warenumsatz, 0,00 € eingenommenes und 10,00 € ausgezahltes Pfand.
@@ -21,10 +21,10 @@
 
 Öffne „Admin-Bereich“, gib die PIN ein und tippe „Entsperren“. Mit „Sperren und zur Kasse“ gibst du das Gerät wieder an die Helfer.
 
-- Unter „Sortiment und Pfand“ kannst du Namen, optionale Einheit, Preis und Pfandpflicht ändern, einen Artikel anlegen oder als ausverkauft deaktivieren und später reaktivieren. Eine Preis- oder Einheitenänderung an einem Glühwein gilt für beide Sorten.
+- Unter „Sortiment und Pfand“ kannst du Namen, Einheit, Preis, Pfandpflicht, Produktsymbol und Alkoholkennzeichen ändern, einen Artikel anlegen oder als ausverkauft deaktivieren und später reaktivieren. Eine Preis- oder Einheitenänderung an einem Glühwein gilt für beide Sorten.
 - Ändere „Globales Pfand“ für künftige Verkäufe und Rückgaben. Bereits gebuchte Vorgänge behalten die damaligen Angaben.
 - „Neue Veranstaltung starten“ übernimmt das Sortiment einschließlich deaktivierter Artikel und den Pfandbetrag. Nach Bestätigung ist die bisherige Veranstaltung abgeschlossen. Die neue beginnt mit leerer Abrechnung. Im Auswahlfeld bleiben frühere Veranstaltungen für Statistik, Umbenennung und CSV erreichbar.
-- Jedes Gerät und jedes Browserprofil führt eigene Bücher. Sichere und exportiere jede Gerätekasse einzeln. Die Statistik zählt Artikel, Warenumsatz sowie beide Pfandsummen der ausgewählten Veranstaltung.
+- Jedes Gerät und jedes Browserprofil führt eigene Bücher. Sichere und exportiere jede Gerätekasse einzeln. Neben dem eingenommenen und ausgezahlten Pfand zeigt die Statistik, wie viele Gläser/Tassen ausgegeben und zurückgenommen wurden. Mitgebrachte Gefäße zählen bei der Ausgabe nicht mit. Stornos korrigieren Betrag und Stückzahl.
 
 ### Finale Preisliste 2026
 

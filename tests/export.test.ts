@@ -22,6 +22,8 @@ describe('Dateiformate', () => {
     const s = csv(name, {
       artikel: [{ name: artikel, einheit: '0,2 l', menge: 1, umsatz: 350 }],
       eingenommen: 200,
+      ausgegebeneGefaesse: 1,
+      zurueckgenommeneGefaesse: 0,
       ausgezahlt: 0,
       ware: 350,
     })

@@ -207,12 +207,25 @@ select {
 .mit-pfand {
   border-top-color: #8c4055;
 }
+.produktzeile { display: flex; justify-content: space-between; gap: .25rem; align-items: baseline; }
+.produktname [aria-hidden] { float: right; margin-left: .15rem; }
+.produktzeile abbr { font-size: .75rem; font-weight: 700; text-decoration: none; }
+.summenleiste .zur-zahlung { min-height: 4rem; padding-inline: 1.4rem; font-size: 1.25rem; }
 .produkt small,
 .position small {
   font-weight: 400;
 }
-.produkt span {
+.produktzeile > span {
   color: var(--akzent);
+}
+.buchungsmeldung { color: var(--einnahme); font-weight: 700; }
+.buchungshaken { display: inline-block; }
+@media (prefers-reduced-motion: no-preference) {
+  .buchungshaken { animation: gebucht .4s ease-out; }
+  @keyframes gebucht { from { opacity: .3; transform: scale(.6); } 65% { transform: scale(1.25); } }
+}
+@media (max-width: 47.99rem) {
+  .buchungsmeldung:not(:empty) { position: fixed; top: .5rem; right: .5rem; z-index: 2; margin: 0; padding: .45rem .8rem; background: var(--flaeche); border: 1px solid currentColor; border-radius: .5rem; pointer-events: none; }
 }
 .aktionen {
   flex-wrap: wrap;
@@ -365,6 +378,7 @@ button.gluehwein-weiss:hover:enabled { background: #e4c268; }
   .sortiment { display: flex; flex-direction: column; }
   .produkte { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; }
   .produkte .produkt { min-height: 5.3rem; padding: .4rem .5rem; }
+  .produkte .produktname { font-size: .94rem; line-height: 1.2; }
   .hauptprodukte .produkt { min-height: 6.5rem; padding: .6rem; }
   .minus-pfand { margin-top: auto; min-height: 3.5rem; padding: .5rem .7rem; font-size: 1.3rem; }
   .bestellung { display: flex; flex-direction: column; gap: .4rem; }
@@ -383,4 +397,8 @@ button.gluehwein-weiss:hover:enabled { background: #e4c268; }
   #root:has(.kassenhaupt) > footer p { display: inline; margin: 0; }
   #root:has(.kassenhaupt) > footer button { min-height: 48px; padding: .25rem .5rem; margin-block: 0; }
   #root:has(.kassenhaupt) > aside, #root:has(.kassenhaupt) > p { margin: 0; padding-block: .2rem; flex-shrink: 0; }
+}
+@media (min-width: 48rem) and (orientation: landscape) and (max-height: 40rem) {
+  .hauptprodukte .produkt { min-height: 5.5rem; padding: .4rem .5rem; }
+  .produkte .produkt { min-height: 4.75rem; }
 }

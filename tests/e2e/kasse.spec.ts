@@ -116,6 +116,7 @@ test('rechnet vier Gläser ab und prüft Offline-CSV, Storno, Sicherung und Wied
   await abschliessen(page, '')
   await admin(page)
   const download = page.waitForEvent('download')
+  await expect(page.getByText('10,00 € · 2 Gläser/Tassen')).toBeVisible()
   await taste(page, 'CSV herunterladen').click()
   const datei = await download
   const inhalt = await readFile((await datei.path())!, 'utf8')
