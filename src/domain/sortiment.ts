@@ -3,8 +3,8 @@ import type { Produkt } from './kasse'
 type Vorgabe = [name: string, einheit: string, preis: number, pflicht: boolean, symbol: string, alkohol: boolean]
 export const SORTIMENTSSTAND = 'weihnachtsmarkt-2026-final' as const
 const vorgaben: Vorgabe[] = [
-  ['Glühwein rot', '', 400, true, '☕', true],
-  ['Glühwein weiß', '', 400, true, '☕', true],
+  ['Glühwein rot', '', 400, true, '', true],
+  ['Glühwein weiß', '', 400, true, '', true],
   ['Bier', '0,33 l', 300, false, '🍺', true],
   ['Wein', '0,1 l', 300, true, '🍷', true],
   ['Wein', '0,2 l', 600, true, '🍷', true],
@@ -19,8 +19,9 @@ const vorgaben: Vorgabe[] = [
 export function kachelmerkmale(p: Produkt) {
   const varianten = vorgaben.filter(([name]) => p.name === name)
   const vorgabe = varianten.length === 1 ? varianten[0] : varianten.find(([, einheit]) => p.einheit === einheit)
+  const alteStandardtasse = vorgabe?.[4] === '' && p.symbol === '☕'
   return {
-    symbol: p.symbol ?? vorgabe?.[4] ?? '',
+    symbol: alteStandardtasse ? '' : p.symbol ?? vorgabe?.[4] ?? '',
     alkohol: p.alkohol ?? varianten[0]?.[5] ?? false,
   }
 }

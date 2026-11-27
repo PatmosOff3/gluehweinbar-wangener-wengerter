@@ -209,7 +209,13 @@ select {
 }
 .produktzeile { display: flex; justify-content: space-between; gap: .25rem; align-items: baseline; }
 .produktname [aria-hidden] { float: right; margin-left: .15rem; }
-.produktzeile abbr { font-size: .75rem; font-weight: 700; text-decoration: none; }
+.produktzeile abbr {
+  display: inline-flex; align-items: center; justify-content: center; align-self: end;
+  width: 1.8rem; height: 1.8rem; flex: none; white-space: nowrap;
+  border: 2px solid currentColor; border-radius: 50%;
+  background: #fff7f4; color: #a61d32; font: 800 .64rem/1 system-ui, sans-serif;
+  text-decoration: none;
+}
 .summenleiste .zur-zahlung { min-height: 4rem; padding-inline: 1.4rem; font-size: 1.25rem; }
 .produkt small,
 .position small {
@@ -235,8 +241,19 @@ select {
   border-bottom: 1px solid var(--rand);
   padding-block: 0.65rem;
 }
-.position > span {
-  display: block;
+.position {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center; gap: .5rem; padding-inline: .4rem; border-radius: .4rem;
+}
+.position + .position { margin-top: .2rem; }
+.positionsartikel small { display: block; }
+.positionsmenge { font-size: 1.45rem; font-variant-numeric: tabular-nums; }
+.position .aktionen { justify-content: end; }
+.bestellung-aktiv { border-color: var(--akzent); box-shadow: inset 0 0 0 1px var(--akzent); }
+.sortiment h2, .zahlungsseite .rueckblick-titel { font: 650 1.05rem/1.25 system-ui, sans-serif; }
+@media (max-width: 24rem) {
+  .position { grid-template-columns: auto minmax(0, 1fr); }
+  .position .aktionen { grid-column: 2; justify-content: start; }
 }
 dl {
   display: grid;
@@ -331,9 +348,9 @@ footer {
 .theme-schalter { margin-left: auto !important; }
 .hauptprodukte { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; margin-bottom: .6rem; }
 .hauptprodukte .produkt { min-height: 7.5rem; font-size: 1.15rem; }
-button.gluehwein-rot { background: #792c44; color: #fff; border-color: #792c44; }
+.gluehwein-rot { background: #792c44; color: #fff; border-color: #792c44; }
 button.gluehwein-rot:hover:enabled { background: #602036; }
-button.gluehwein-weiss { background: #f0d382; color: #382805; border-color: #957023; }
+.gluehwein-weiss { background: #f0d382; color: #382805; border-color: #957023; }
 button.gluehwein-weiss:hover:enabled { background: #e4c268; }
 .gluehwein-rot span, .gluehwein-weiss span { color: inherit; }
 .produkt > * { position: relative; z-index: 1; }
@@ -345,6 +362,23 @@ button.gluehwein-weiss:hover:enabled { background: #e4c268; }
 .geldwahl > label { grid-column: 1 / -1; }
 .zahlungs-popup { width: min(36rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); overflow-y: auto; padding: 1.4rem; border: 2px solid var(--rand); border-radius: 1rem; background: var(--flaeche); color: var(--text); box-shadow: 0 1rem 4rem #0006; }
 .zahlungs-popup::backdrop { background: #0009; }
+.ziffern-popup { max-width: 23rem; }
+.ziffern-betrag { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin: .75rem 0; }
+.ziffern-betrag output { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.zifferntasten { display: grid; grid-template-columns: repeat(3, 1fr); gap: .35rem; }
+.zifferntasten button { margin: 0; font-size: 1.3rem; }
+.ziffern-popup .aktionen { margin-top: .75rem; }
+.erfolgs-popup { max-width: 22rem; text-align: center; }
+.erfolgs-haken { display: inline-grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 50%; background: #16623b; color: white; font-size: 2rem; }
+.erfolgs-popup h2 { margin: .6rem 0 0; font: 650 1.25rem/1.3 system-ui, sans-serif; }
+@media (prefers-reduced-motion: no-preference) {
+  .erfolgs-popup[open] { animation: zahlung-bestaetigt .8s ease-in-out both; }
+  @keyframes zahlung-bestaetigt {
+    from { opacity: 0; transform: translateY(.3rem); }
+    15%, 85% { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-.2rem); }
+  }
+}
 .zahlungs-popup .rueckgeld { margin-block: 1rem; }
 .zahlungs-popup .popup-abschluss { display: block; width: 100%; min-height: 5.5rem; margin: 1rem 0 .75rem; font-size: 1.5rem; }
 .zahlungs-popup .popup-zurueck { display: block; width: 100%; margin: .4rem 0; }
@@ -374,7 +408,7 @@ button.gluehwein-weiss:hover:enabled { background: #e4c268; }
   .kassenhaupt { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: .5rem max(.6rem, calc((100vw - 80rem) / 2)); gap: .5rem; }
   .kassenraster { flex: 1; min-height: 0; align-items: stretch; gap: .6rem; }
   .kassenraster > section { min-height: 0; margin: 0; padding: .65rem; }
-  .kassenraster h2 { font-size: 1.45rem; margin: 0 0 .5rem; }
+  .sortiment h2 { margin: 0 0 .4rem; }
   .sortiment { display: flex; flex-direction: column; }
   .produkte { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; }
   .produkte .produkt { min-height: 5.3rem; padding: .4rem .5rem; }

@@ -20,6 +20,9 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 it('behält eine passende Zahlung bei einem Schreibfehler und bucht beim erneuten Tipp genau einmal', async () => {
+  // jsdom implementiert die nativen Dialogmethoden nicht.
+  HTMLDialogElement.prototype.showModal ??= function () { this.open = true }
+  HTMLDialogElement.prototype.close ??= function () { this.open = false }
   await db.open()
   const id = await einrichten(db, 'Testfest', 500, testPin)
   render(<Kasse eventId={id} offenMelden={() => {}} />)
@@ -48,7 +51,7 @@ it.each([320, 1100])(
     const rot = await screen.findByRole('button', { name: /Glühwein rot 4/ })
     fireEvent.click(rot)
     expect(
-      screen.getByRole('heading', { name: 'Offene Bestellung' }),
+      screen.getByRole('region', { name: 'Offene Bestellung' }),
     ).toBeTruthy()
     expect(screen.getAllByText('+ 6,00 €')).toHaveLength(2)
   },

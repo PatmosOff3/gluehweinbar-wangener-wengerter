@@ -34,7 +34,16 @@ Honig ist für 8 € je 500 g im finalen Standardsortiment enthalten. Die Schrit
 
 ## iPad-Querformat und Darstellungsmodus
 
+Messung im emulierten iPad-WebKit mit je einem Stück aller elf Standardartikel, im Hellmodus am Anfang der Bestellliste. Vergleichsstand ist der Git-Tag `v1`.
+
+| Viewport in CSS-Pixeln | Listenhöhe v1 → überarbeitet | Vollständig sichtbare Positionen v1 → überarbeitet |
+| --- | --- | --- |
+| 1105 × 688 | 254 → 295 px | 2 → 4 |
+| 1105 × 604 | 170 → 211 px | 1 → 3 |
+| 1024 × 600 | 166 → 207 px | 1 → 3 |
+
 - [ ] Auf dem echten iPad mit eingeblendeten Safari-Leisten und als installierte PWA prüfen: alle elf Standardartikel, Minus-Pfand und Zur Zahlung sind ohne Seitenscrollen sichtbar.
+- [ ] Auf dem echten iPad in Safari und über das Home-Bildschirm-Symbol einen Verkauf über 9 € öffnen. „Anderer Betrag“ antippen, 12,50 € eingeben und 3,50 € Rückgeld prüfen. Über „Bargeld ändern“ mit der Rücktaste korrigieren und abbrechen. Währenddessen bleibt die iPad-Systemtastatur geschlossen. Geräteprüfung ausstehend.
 - [ ] Alle Artikel einmal erfassen: Nur die Positionsliste der offenen Bestellung scrollt. Summe, Pfandübersicht und Bestellaktionen bleiben sichtbar; auch die letzte Position kann entfernt werden.
 - [ ] Ohne Admin-PIN zwischen Dunkelmodus und Hellmodus wechseln; Lesbarkeit, Rot-/Weiß-Unterscheidung und rote Auszahlungsbeträge einschließlich Rückgeld prüfen.
 - [ ] Browser neu öffnen: Darstellungswahl und gebuchte Vorgänge sind erhalten. Safari-Leisten ein-/ausblenden und erneut die Erreichbarkeit der Zahlungsaktion prüfen.

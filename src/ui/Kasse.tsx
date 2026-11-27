@@ -15,6 +15,12 @@ import { kachelmerkmale } from '../domain/sortiment'
 import { db } from '../storage/db'
 import { Fehler, useAktion } from './formulare'
 
+function produktfarbe(name: string) {
+  if (name === 'Glühwein rot') return ' gluehwein-rot'
+  if (name === 'Glühwein weiß') return ' gluehwein-weiss'
+  return ''
+}
+
 export function Kasse({
   eventId,
   offenMelden,
@@ -40,6 +46,15 @@ export function Kasse({
   const [rueckblick, letzteAnzeigen] = useState(false)
   const letzte = daten?.buchungen.filter((p) => p.art === 'verkauf').at(-1)
   const [meldung, melden] = useState('')
+  const [passendGebucht, passendBestaetigen] = useState(false)
+  useEffect(() => {
+    if (!passendGebucht) return
+    const timer = window.setTimeout(() => {
+      bezahlen(undefined)
+      passendBestaetigen(false)
+    }, 800)
+    return () => window.clearTimeout(timer)
+  }, [passendGebucht])
   const produkte = daten?.produkte.filter((p) => p.aktiv) ?? []
   const prioritaet = ['Glühwein rot', 'Glühwein weiß', 'Bier']
   const hauptprodukte = produkte
@@ -80,23 +95,23 @@ export function Kasse({
       <Zahlung
         bestand={zahlung}
         zurueck={() => bezahlen(undefined)}
-        buchen={async (gegeben, id) => {
+        erfolgsmeldung={passendGebucht ? meldung : ''}
+        buchen={async (gegeben, id, passend) => {
           const buchung = await verkaufen(db, eventId, id, zahlung, gegeben)
           setzen({})
           minusSetzen(0)
-          bezahlen(undefined)
+          if (passend) passendBestaetigen(true)
+          else bezahlen(undefined)
           melden('Vorgang ' + buchung.nummer + ' gebucht.')
         }}
       />
     )
   function produkttaste(p: Produkt) {
     const { symbol, alkohol } = kachelmerkmale(p)
-    const farbe = p.name === 'Glühwein rot' ? ' gluehwein-rot'
-      : p.name === 'Glühwein weiß' ? ' gluehwein-weiss' : ''
     return (
       <button
         key={p.id}
-        className={'produkt' + (p.pflicht ? ' mit-pfand' : '') + farbe}
+        className={'produkt' + (p.pflicht ? ' mit-pfand' : '') + produktfarbe(p.name)}
         onClick={() => menge(p.id, (mengen[p.id] ?? 0) + 1)}
       >
         <span className="produktname">
@@ -106,7 +121,7 @@ export function Kasse({
         {p.einheit && <small>{p.einheit}</small>}
         <span className="produktzeile">
           <span>{geld(p.preis)}</span>
-          {alkohol && <abbr title="Alkoholhaltig">Alk.</abbr>}
+          {alkohol && <abbr title="Alkoholhaltig">ALK</abbr>}
         </span>
       </button>
     )
@@ -127,29 +142,28 @@ export function Kasse({
             − Pfand <span>− {geld(b.pfand)}</span>
           </button>
         </section>
-        <section className="bestellung">
-          <h2>Offene Bestellung</h2>
+        <section aria-label="Offene Bestellung" className={'bestellung' + (offen ? ' bestellung-aktiv' : '')}>
           <p className={'bestellsumme' + (b.summe < 0 ? ' auszahlung' : b.summe > 0 ? ' einnahme' : '')}>
             {b.summe < 0 ? '−' : '+'} {geld(Math.abs(b.summe))}
           </p>
           <Bestellpositionen>
             {!offen && <p>Noch keine Artikel oder Rückgaben.</p>}
-            {b.positionen.map((p) => (
-              <div className="position" key={p.id}>
-                <strong>
-                  {p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}{' '}
-                  {p.einheit && <small>{p.einheit}</small>}
-                </strong>
-                <span>
-                  {p.menge} × {geld(p.preis)}
-                </span>
+            {zeilen.map(({ artikel: p, menge: anzahl }) => (
+              <div className={'position' + produktfarbe(p.name)} key={p.id}>
+                <strong className="positionsmenge">{anzahl}×</strong>
+                <div className="positionsartikel">
+                  <strong><span aria-hidden="true">{kachelmerkmale(p).symbol}</span>{' '}
+                    {p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}
+                  </strong>
+                  <small>{p.einheit && p.einheit + ' · '}{geld(p.preis)}</small>
+                </div>
                 <div className="aktionen">
-                  <button
+                  {anzahl > 1 && <button
                     aria-label={p.name + ' verringern'}
-                    onClick={() => menge(p.id, p.menge - 1)}
+                    onClick={() => menge(p.id, anzahl - 1)}
                   >
                     −
-                  </button>
+                  </button>}
                   <button
                     aria-label={p.name + ' entfernen'}
                     onClick={() => menge(p.id, 0)}
@@ -209,7 +223,7 @@ export function Kasse({
 
 function LetzteBestellung({ buchung, storniert, zurueck }: { buchung: Buchung; storniert: boolean; zurueck: () => void }) {
   return <main className="zahlungsseite">
-    <h2>Letzte Bestellung · Vorgang {buchung.nummer}</h2>
+    <h2 className="rueckblick-titel">Letzte Bestellung · Vorgang {buchung.nummer}</h2>
     <p>{storniert ? 'Storniert' : 'Bereits abgeschlossen'} · {new Date(buchung.zeit).toLocaleString('de-DE')}</p>
     <section className="zahlungszusammenfassung">
       <h3>Bestellung</h3>
@@ -226,17 +240,74 @@ function LetzteBestellung({ buchung, storniert, zurueck }: { buchung: Buchung; s
   </main>
 }
 
-function ZahlungsPopup({ children, schliessen, gesperrt }: { children: ReactNode; schliessen: () => void; gesperrt: boolean }) {
+function ZahlungsPopup({ children, titel, schliessen, gesperrt = false, klasse = '' }: {
+  children: ReactNode
+  titel: string
+  schliessen?: () => void
+  gesperrt?: boolean
+  klasse?: string
+}) {
   const dialog = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     const element = dialog.current
     element?.showModal()
     return () => element?.close()
   }, [])
-  return <dialog ref={dialog} className="zahlungs-popup" aria-labelledby="rueckgeld-titel" onCancel={(e) => {
+  return <dialog ref={dialog} className={'zahlungs-popup ' + klasse} aria-labelledby={titel} onCancel={(e) => {
     e.preventDefault()
-    if (!gesperrt) schliessen()
+    if (!gesperrt) schliessen?.()
   }}>{children}</dialog>
+}
+
+function Ziffernblock({ startwert, summe, abbrechen, uebernehmen }: {
+  startwert: string
+  summe: number
+  abbrechen: () => void
+  uebernehmen: (wert: string) => void
+}) {
+  const [wert, setzen] = useState(startwert)
+  let gueltig = false
+  let hinweis = ''
+  if (wert && !wert.endsWith(',')) {
+    try {
+      barzahlung(summe, euroEingabe(wert))
+      gueltig = true
+    } catch (fehler) {
+      hinweis = (fehler as Error).message
+    }
+  }
+  function tippen(taste: string) {
+    setzen((alt) => {
+      if (taste === 'Backspace') return alt.slice(0, -1)
+      const neu = (alt || (taste === ',' ? '0' : '')) + taste
+      return /^\d+(?:,\d{0,2})?$/.test(neu) ? neu.replace(/^0+(?=\d)/, '') : alt
+    })
+  }
+  return <ZahlungsPopup titel="ziffern-titel" klasse="ziffern-popup" schliessen={abbrechen}>
+    <div onKeyDown={(e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return
+      if (/^[0-9,.]$/.test(e.key) || e.key === 'Backspace') {
+        e.preventDefault()
+        tippen(e.key === '.' ? ',' : e.key)
+      }
+    }}>
+      <h2 id="ziffern-titel">Erhaltenes Bargeld</h2>
+      <div className="ziffern-betrag"><span>Fällig {geld(summe)}</span>
+        <output aria-label="Eingegebener Betrag">{wert || '0'} €</output>
+      </div>
+      <div className="zifferntasten">
+        {['1','2','3','4','5','6','7','8','9',',','0','Backspace'].map((taste) =>
+          <button key={taste} aria-label={taste === 'Backspace' ? 'Letzte Stelle löschen' : undefined}
+            onClick={() => tippen(taste)}>{taste === 'Backspace' ? '⌫' : taste}</button>
+        )}
+      </div>
+      {hinweis && <p role="status">{hinweis}</p>}
+      <div className="aktionen">
+        <button onClick={abbrechen}>Abbrechen</button>
+        <button className="primaer" disabled={!gueltig} onClick={() => uebernehmen(wert)}>Rückgeld anzeigen</button>
+      </div>
+    </div>
+  </ZahlungsPopup>
 }
 
 function Bestellpositionen({ children }: { children: ReactNode }) {
@@ -280,16 +351,17 @@ function Zahlung({
   bestand,
   zurueck,
   buchen,
+  erfolgsmeldung,
 }: {
   bestand: Bestand
   zurueck: () => void
-  buchen: (gegeben: number, id: string) => Promise<void>
+  buchen: (gegeben: number, id: string, passend?: boolean) => Promise<void>
+  erfolgsmeldung: string
 }) {
   const [id] = useState(neueId)
   const [wahl, waehlen] = useState<number | 'frei' | undefined>()
   const [text, eingeben] = useState('')
-  const [popup, popupZeigen] = useState(false)
-  const eingabe = useRef<HTMLInputElement>(null)
+  const [popup, popupZeigen] = useState<'ziffern' | 'rueckgeld'>()
   const aktion = useAktion()
   let gegeben = 0
   let hinweis = ''
@@ -336,35 +408,19 @@ function Zahlung({
       </p>
       {bestand.summe > 0 && (
         <div className="geldwahl" role="group" aria-label="Erhaltenes Bargeld auswählen">
-          <button disabled={aktion.beschaeftigt} onClick={() => void aktion.ausfuehren(() => buchen(bestand.summe, id))}>Passend</button>
+          <button disabled={aktion.beschaeftigt || !!erfolgsmeldung} onClick={() => void aktion.ausfuehren(() => buchen(bestand.summe, id, true))}>Passend</button>
           {schnellbetraege.map((c) => (
-            <button key={c} disabled={aktion.beschaeftigt} aria-pressed={wahl === c} onClick={() => { waehlen(c); popupZeigen(true) }}>
+            <button key={c} disabled={aktion.beschaeftigt} aria-pressed={wahl === c} onClick={() => { waehlen(c); popupZeigen('rueckgeld') }}>
               {c / 100} €
             </button>
           ))}
           <button
             aria-pressed={wahl === 'frei'}
             disabled={aktion.beschaeftigt}
-            onClick={() => {
-              waehlen('frei')
-              if (eingabe.current?.parentElement)
-                eingabe.current.parentElement.hidden = false
-              eingabe.current?.focus()
-            }}
+            onClick={() => popupZeigen('ziffern')}
           >
             Anderer Betrag
           </button>
-          <label hidden={wahl !== 'frei'}>
-            Erhaltenes Bargeld (€)
-            <input
-              ref={eingabe}
-              disabled={aktion.beschaeftigt}
-              type="text"
-              inputMode="decimal"
-              value={text}
-              onChange={(e) => eingeben(e.target.value)}
-            />
-          </label>
         </div>
       )}
       {!popup && <p
@@ -380,17 +436,27 @@ function Zahlung({
       <button
         className="primaer"
         disabled={!gueltig || aktion.beschaeftigt}
-        onClick={() => bestand.summe > 0 ? popupZeigen(true) : void aktion.ausfuehren(() => buchen(gegeben, id))}
+        onClick={() => bestand.summe > 0 ? popupZeigen('rueckgeld') : void aktion.ausfuehren(() => buchen(gegeben, id))}
       >
         {bestand.summe > 0 ? 'Rückgeld anzeigen' : 'Vorgang abschließen'}
       </button>
-      {popup && <ZahlungsPopup schliessen={() => popupZeigen(false)} gesperrt={aktion.beschaeftigt}>
+      {erfolgsmeldung && <ZahlungsPopup titel="buchung-erfolg" klasse="erfolgs-popup">
+        <span className="erfolgs-haken" aria-hidden="true">✓</span>
+        <h2 id="buchung-erfolg">{erfolgsmeldung}</h2>
+      </ZahlungsPopup>}
+      {popup === 'ziffern' && <Ziffernblock startwert={text} summe={bestand.summe}
+        abbrechen={() => popupZeigen(undefined)} uebernehmen={(wert) => {
+          eingeben(wert)
+          waehlen('frei')
+          popupZeigen('rueckgeld')
+        }} />}
+      {popup === 'rueckgeld' && <ZahlungsPopup titel="rueckgeld-titel" schliessen={() => popupZeigen(undefined)} gesperrt={aktion.beschaeftigt}>
         <h2 id="rueckgeld-titel">{gueltig ? 'Rückgeld' : 'Bargeld prüfen'}</h2>
         <p className={gueltig ? 'rueckgeld' : 'fehler'} role="status">{hinweis}</p>
         <p>Erhalten: {geld(gegeben)} · Gesamt: {geld(bestand.summe)}</p>
         <Fehler text={aktion.fehler} />
         <button className="primaer popup-abschluss" autoFocus disabled={!gueltig || aktion.beschaeftigt} onClick={() => void aktion.ausfuehren(() => buchen(gegeben, id))}>Vorgang abschließen</button>
-        <button className="popup-zurueck" disabled={aktion.beschaeftigt} onClick={() => popupZeigen(false)}>Bargeld ändern</button>
+        <button className="popup-zurueck" disabled={aktion.beschaeftigt} onClick={() => popupZeigen(wahl === 'frei' ? 'ziffern' : undefined)}>Bargeld ändern</button>
         <button className="popup-zurueck" disabled={aktion.beschaeftigt} onClick={zurueck}>Zurück zur Bestellung</button>
       </ZahlungsPopup>}
     </main>

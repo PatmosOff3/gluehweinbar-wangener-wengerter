@@ -16,7 +16,8 @@ const produkte = standardsortiment('fest', () => crypto.randomUUID())
 const rot = { ...produkte[0], preis: 350 }
 const weiss = { ...produkte[1], preis: 350 }
 it('ergänzt Kennzeichen für Altartikel und respektiert eigene Angaben', () => {
-  expect(kachelmerkmale({ ...rot, einheit: '0,25 l', symbol: undefined, alkohol: undefined })).toEqual({ symbol: '☕', alkohol: true })
+  expect(kachelmerkmale({ ...rot, einheit: '0,25 l', symbol: undefined, alkohol: undefined })).toEqual({ symbol: '', alkohol: true })
+  expect(kachelmerkmale({ ...rot, symbol: '☕' }).symbol).toBe('')
   expect(kachelmerkmale({ ...rot, symbol: '🍎', alkohol: false })).toEqual({ symbol: '🍎', alkohol: false })
 })
 const schorle = { ...produkte[7], preis: 250 }

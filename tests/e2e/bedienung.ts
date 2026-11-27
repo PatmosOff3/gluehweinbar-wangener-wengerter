@@ -25,4 +25,5 @@ export async function abschliessen(page: Page, zahlung = 'Passend') {
   if (zahlung) await taste(page, zahlung).click()
   if (zahlung !== 'Passend') await taste(page, 'Vorgang abschließen').click()
   await expect(page.getByText(/Vorgang \d+ gebucht/)).toBeVisible()
+  await expect(taste(page, 'Zur Zahlung')).toBeDisabled()
 }

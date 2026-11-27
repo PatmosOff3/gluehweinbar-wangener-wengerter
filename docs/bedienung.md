@@ -6,11 +6,11 @@
 
 ## Bargeld und Gefäße
 
-1. Tippe für jedes Stück einmal auf die Produkttaste. Das Symbol rechts neben dem Namen unterscheidet Glas, Shot und Flasche. Prüfe bei Wein die Größe. „Alk.“ unten rechts kennzeichnet alkoholhaltige Getränke. In der offenen Bestellung kannst du Mengen verringern oder eine Position entfernen.
+1. Tippe für jedes Stück einmal auf die Produkttaste. Symbole unterscheiden Weinglas, Shot und Flasche. Roten und weißen Glühwein erkennst du auch in der Bestellung an der Farbe. Das rote „ALK“ im Kreis kennzeichnet alkoholhaltige Getränke. Die große Zahl links in der Bestellzeile zeigt die Menge. Ab zwei Stück kannst du sie mit „−“ verringern. „Entfernen“ löscht die ganze Position.
 2. Für eine neue Tasse zählt das Pfand automatisch. Für ein mitgebrachtes Gefäß tippe einmal „− Pfand“.
 3. Für jedes zusätzlich zurückgegebene leere Gefäß tippe ebenfalls „− Pfand“. Zusätzliche Abzüge zählen als ausgezahltes Pfand. Das funktioniert auch ohne Warenkauf. Über die Korrekturtaste in der Bestellung kannst du einen Pfandabzug zurücknehmen.
-4. Prüfe Betrag und Vorzeichen in der Summenleiste und öffne „Zur Zahlung“. Hat der Gast passend bezahlt, tippe einmal auf „Passend“. Die Kasse bucht den Verkauf sofort. Ein Häkchen und die Vorgangsnummer bestätigen den Abschluss auf der leeren Kasse.
-5. Bei Wechselgeld wähle den erhaltenen Schein. Für einen freien Betrag wähle „Anderer Betrag“, gib die Summe ein und tippe auf „Rückgeld anzeigen“. Im Popup kannst du über „Bargeld ändern“ die Eingabe korrigieren oder zur Bestellung zurückkehren. Gib das Rückgeld heraus und tippe auf „Vorgang abschließen“. Nullbeträge und Auszahlungen schließt du direkt ab.
+4. Prüfe den Betrag oben im umrahmten Bestellbereich und öffne „Zur Zahlung“. Hat der Gast passend bezahlt, tippe einmal auf „Passend“. Nach dem Speichern bestätigt ein grünes Häkchen mit Vorgangsnummer den Verkauf auf der Zahlungsseite. Die leere Kasse erscheint automatisch.
+5. Bei Wechselgeld wähle den erhaltenen Schein. „Anderer Betrag“ öffnet den Ziffernblock der Kasse. Für 20 € tippe auf 2 und 0, für 12,50 € auf 1, 2, Komma, 5 und 0. Mit der Rücktaste korrigierst du die letzte Stelle. „Rückgeld anzeigen“ übernimmt den Betrag. Über „Bargeld ändern“ kannst du ihn nochmals anpassen. Gib das Rückgeld heraus und tippe auf „Vorgang abschließen“. Nullbeträge und Auszahlungen schließt du direkt ab.
 6. Bei einem Fehler öffne den Admin-Bereich, entsperre ihn mit der PIN und wähle „Letzten Verkauf stornieren“. Prüfe die Nummer und bestätige. Die Auswertung berücksichtigt die Gegenbuchung sofort.
 
 **Kontrollbeispiel.** Ein roter und ein weißer Glühwein zu je 4,00 €, viermal „− Pfand“ für zwei vorhandene und zwei zurückgegebene Gläser zu je 5,00 € ergeben **2,00 € auszahlen**. Die Statistik enthält 8,00 € Warenumsatz, 0,00 € eingenommenes und 10,00 € ausgezahltes Pfand.
@@ -36,7 +36,7 @@ Beim ersten Öffnen dieser Version werden die bekannte aktive Veranstaltung und 
 
 Über „Dunkelmodus“ in der Kopfzeile wechselst du direkt ohne PIN zur dunklen Darstellung; „Hellmodus“ wechselt zurück. Die Auswahl bleibt auf diesem Gerät und Browserprofil gespeichert. Glühwein rot, Glühwein weiß und Bier stehen als größere Tasten oben. Größenangaben sind optional; Glühwein wird ohne Größe angezeigt.
 
-Auszahlungen, Pfandabzüge und Rückgeld sind rot markiert. Prüfe zusätzlich immer Text und Vorzeichen. Im iPad-Querformat bleibt die Zahlungsleiste sichtbar; nur die Artikelliste unter „Offene Bestellung“ scrollt bei vielen Positionen. Auf dem Smartphone kannst du die Seite wie gewohnt vertikal bewegen.
+Auszahlungen, Pfandabzüge und Rückgeld sind rot markiert. Prüfe zusätzlich immer Text und Vorzeichen. Im iPad-Querformat bleibt die Zahlungsleiste sichtbar. Bei vielen Positionen scrollt die Liste unter dem Bestellbetrag. Auf dem Smartphone kannst du die Seite wie gewohnt vertikal bewegen.
 
 ## Dateien und Offlinebetrieb
 

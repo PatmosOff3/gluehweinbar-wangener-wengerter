@@ -45,14 +45,11 @@ test('prüft Ersteinrichtung, Zugang, Mengentasten, Rückgeld, Auszahlung und Do
   await expect(page.getByText('1,00 € Rückgeld')).toBeVisible()
   await taste(page, 'Bargeld ändern').click()
   await taste(page, 'Anderer Betrag').click()
-  await expect(page.getByLabel('Erhaltenes Bargeld (€)')).toBeFocused()
-  await expect(page.getByLabel('Erhaltenes Bargeld (€)')).toHaveAttribute(
-    'inputmode',
-    'decimal',
-  )
-  await page.getByLabel('Erhaltenes Bargeld (€)').fill('9,50')
+  const ziffern = page.getByRole('dialog', { name: 'Erhaltenes Bargeld' })
+  await expect(ziffern.getByRole('textbox')).toHaveCount(0)
+  for (const ziffer of '9,50') await ziffern.getByRole('button', { name: ziffer, exact: true }).click()
+  await ziffern.getByRole('button', { name: 'Rückgeld anzeigen' }).click()
   await expect(page.getByText('0,50 € Rückgeld')).toBeVisible()
-  await taste(page, 'Rückgeld anzeigen').click()
   await taste(page, 'Vorgang abschließen').evaluate((button) => {
     ;(button as HTMLButtonElement).click()
     ;(button as HTMLButtonElement).click()
