@@ -9,6 +9,7 @@ import {
   type Bestand,
   type Produkt,
   type Buchung,
+  type Zahlungsart,
 } from '../domain/kasse'
 import { neueId, sortiment, verkaufen } from '../application/kasse'
 import { kachelmerkmale } from '../domain/sortiment'
@@ -53,15 +54,15 @@ export function Kasse({
   const [rueckblick, letzteAnzeigen] = useState(false)
   const letzte = daten?.buchungen.filter((p) => p.art === 'verkauf').at(-1)
   const [meldung, melden] = useState('')
-  const [passendGebucht, passendBestaetigen] = useState(false)
+  const [gebucht, buchungBestaetigen] = useState(false)
   useEffect(() => {
-    if (!passendGebucht) return
+    if (!gebucht) return
     const timer = window.setTimeout(() => {
       bezahlen(undefined)
-      passendBestaetigen(false)
+      buchungBestaetigen(false)
     }, 800)
     return () => window.clearTimeout(timer)
-  }, [passendGebucht])
+  }, [gebucht])
   const produkte = daten?.produkte.filter((p) => p.aktiv) ?? []
   const prioritaet = ['Glühwein rot', 'Glühwein weiß', 'Bier']
   const hauptprodukte = produkte
@@ -104,13 +105,12 @@ export function Kasse({
         produkte={daten.produkte}
         bestand={zahlung}
         zurueck={() => bezahlen(undefined)}
-        erfolgsmeldung={passendGebucht ? meldung : ''}
-        buchen={async (gegeben, id, passend) => {
-          const buchung = await verkaufen(db, eventId, id, zahlung, gegeben)
+        erfolgsmeldung={gebucht ? meldung : ''}
+        buchen={async (gegeben, id, zahlungsart) => {
+          const buchung = await verkaufen(db, eventId, id, zahlung, gegeben, zahlungsart)
           setzen({})
           minusSetzen(0)
-          if (passend) passendBestaetigen(true)
-          else bezahlen(undefined)
+          buchungBestaetigen(true)
           melden('Vorgang ' + buchung.nummer + ' gebucht.')
         }}
       />
@@ -245,11 +245,13 @@ function LetzteBestellung({ buchung, storniert, zurueck }: { buchung: Buchung; s
       <dl>
         <dt>Automatisches Pfand · {buchung.automatisch}×</dt><dd>{geld(buchung.automatisch * buchung.pfand)}</dd>
         <dt>− Pfand · {buchung.vorhanden + buchung.rueckgaben}×</dt><dd className="auszahlung">{geld(-(buchung.vorhanden + buchung.rueckgaben) * buchung.pfand)}</dd>
-        <dt>Erhaltenes Bargeld</dt><dd>{geld(buchung.gegeben)}</dd>
+        {buchung.zahlungsart === 'paypal'
+          ? <><dt>Per PayPal bezahlt</dt><dd>{geld(buchung.summe)}</dd></>
+          : <><dt>Erhaltenes Bargeld</dt><dd>{geld(buchung.gegeben)}</dd></>}
       </dl>
     </section>
     <p className={'gross ' + (buchung.summe < 0 ? 'auszahlung' : buchung.summe > 0 ? 'einnahme' : '')}>{buchung.summe < 0 ? '−' : '+'} {geld(Math.abs(buchung.summe))}</p>
-    {buchung.summe > 0 && <p className="rueckgeld">{geld(buchung.rueckgeld)} Rückgeld</p>}
+    {buchung.summe > 0 && buchung.zahlungsart !== 'paypal' && <p className="rueckgeld">{geld(buchung.rueckgeld)} Rückgeld</p>}
     <button className="primaer" onClick={zurueck}>Zurück zur Bestellung</button>
   </main>
 }
@@ -372,13 +374,13 @@ function Zahlung({
   bestand: Bestand
   produkte: Produkt[]
   zurueck: () => void
-  buchen: (gegeben: number, id: string, passend?: boolean) => Promise<void>
+  buchen: (gegeben: number, id: string, zahlungsart?: Zahlungsart) => Promise<void>
   erfolgsmeldung: string
 }) {
   const [id] = useState(neueId)
   const [wahl, waehlen] = useState<number | 'frei' | undefined>()
   const [text, eingeben] = useState('')
-  const [popup, popupZeigen] = useState<'ziffern' | 'rueckgeld'>()
+  const [popup, popupZeigen] = useState<'ziffern' | 'rueckgeld' | 'paypal'>()
   const aktion = useAktion()
   let gegeben = 0
   let hinweis = ''
@@ -398,7 +400,7 @@ function Zahlung({
   }
   return (
     <main className="zahlungsseite">
-      <h2>Barzahlung</h2>
+      <h2 className="zahlungstitel">Barzahlung</h2>
       <section className="zahlungszusammenfassung">
         <h3>Bestellung</h3>
         {bestand.positionen.map((p) => (
@@ -425,8 +427,8 @@ function Zahlung({
         {bestand.summe < 0 ? '−' : '+'} {geld(Math.abs(bestand.summe))}
       </p>
       {bestand.summe > 0 && (
-        <div className="geldwahl" role="group" aria-label="Erhaltenes Bargeld auswählen">
-          <button disabled={aktion.beschaeftigt || !!erfolgsmeldung} onClick={() => void aktion.ausfuehren(() => buchen(bestand.summe, id, true))}>Passend</button>
+        <div className="geldwahl" role="group" aria-label="Zahlung auswählen">
+          <button disabled={aktion.beschaeftigt || !!erfolgsmeldung} onClick={() => void aktion.ausfuehren(() => buchen(bestand.summe, id))}>Passend</button>
           {schnellbetraege.map((c) => (
             <button key={c} disabled={aktion.beschaeftigt} aria-pressed={wahl === c} onClick={() => { waehlen(c); popupZeigen('rueckgeld') }}>
               {c / 100} €
@@ -439,6 +441,7 @@ function Zahlung({
           >
             Anderer Betrag
           </button>
+          <button disabled={aktion.beschaeftigt} onClick={() => popupZeigen('paypal')}>PayPal</button>
         </div>
       )}
       {!popup && <p
@@ -462,13 +465,20 @@ function Zahlung({
         <span className="erfolgs-haken" aria-hidden="true">✓</span>
         <h2 id="buchung-erfolg">{erfolgsmeldung}</h2>
       </ZahlungsPopup>}
+      {!erfolgsmeldung && popup === 'paypal' && <ZahlungsPopup titel="paypal-titel" schliessen={() => popupZeigen(undefined)} gesperrt={aktion.beschaeftigt}>
+        <h2 id="paypal-titel">PayPal-Zahlung bestätigen</h2>
+        <p>Sind die {geld(bestand.summe)} bei PayPal eingegangen?</p>
+        <Fehler text={aktion.fehler} />
+        <button className="primaer popup-abschluss" disabled={aktion.beschaeftigt} onClick={() => void aktion.ausfuehren(() => buchen(0, id, 'paypal'))}>Vorgang abschließen</button>
+        <button disabled={aktion.beschaeftigt} onClick={() => popupZeigen(undefined)}>Abbrechen</button>
+      </ZahlungsPopup>}
       {popup === 'ziffern' && <Ziffernblock startwert={text} summe={bestand.summe}
         abbrechen={() => popupZeigen(undefined)} uebernehmen={(wert) => {
           eingeben(wert)
           waehlen('frei')
           popupZeigen('rueckgeld')
         }} />}
-      {popup === 'rueckgeld' && <ZahlungsPopup titel="rueckgeld-titel" schliessen={() => popupZeigen(undefined)} gesperrt={aktion.beschaeftigt}>
+      {!erfolgsmeldung && popup === 'rueckgeld' && <ZahlungsPopup titel="rueckgeld-titel" schliessen={() => popupZeigen(undefined)} gesperrt={aktion.beschaeftigt}>
         <h2 id="rueckgeld-titel">{gueltig ? 'Rückgeld' : 'Bargeld prüfen'}</h2>
         <p className={gueltig ? 'rueckgeld' : 'fehler'} role="status">{hinweis}</p>
         <p>Erhalten: {geld(gegeben)} · Gesamt: {geld(bestand.summe)}</p>

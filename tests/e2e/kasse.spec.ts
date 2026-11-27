@@ -117,13 +117,15 @@ test('rechnet vier Gläser ab und prüft Offline-CSV, Storno, Sicherung und Wied
   await taste(page, 'CSV herunterladen').click()
   const datei = await download
   const inhalt = await readFile((await datei.path())!, 'utf8')
-  expect(inhalt.split('\r\n').filter(Boolean)).toHaveLength(6)
+  expect(inhalt.split('\r\n').filter(Boolean)).toHaveLength(8)
   for (const zeile of [
     '"Winterfest";"Glühwein rot";"";"1";"4,00"',
     '"Glühwein weiß";"";"1";"4,00"',
     '"Warenumsatz";"";"";"8,00"',
     '"Eingenommenes Pfand";"";"";"0,00"',
     '"Ausgezahltes Pfand";"";"";"10,00"',
+    '"Bar (inkl. Pfand und Auszahlungen)";"";"";"−2,00"',
+    '"PayPal (inkl. Pfand)";"";"";"0,00"',
   ])
     expect(inhalt).toContain(zeile)
   const sicherung = page.waitForEvent('download')

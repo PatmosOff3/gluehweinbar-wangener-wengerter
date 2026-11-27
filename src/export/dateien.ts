@@ -19,6 +19,8 @@ export function csv(name: string, statistik: ReturnType<typeof auswerten>) {
     [name, 'Warenumsatz', '', '', dezimal(statistik.ware)],
     [name, 'Eingenommenes Pfand', '', '', dezimal(statistik.eingenommen)],
     [name, 'Ausgezahltes Pfand', '', '', dezimal(statistik.ausgezahlt)],
+    [name, 'Bar (inkl. Pfand und Auszahlungen)', '', '', dezimal(statistik.bar)],
+    [name, 'PayPal (inkl. Pfand)', '', '', dezimal(statistik.paypal)],
   ]
   const feld = (wert: string | number) => {
     let s = String(wert)

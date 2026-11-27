@@ -92,7 +92,7 @@ it('summiert gebuchte Positionen und beide Pfandsummen unabhängig vom Wechselge
   expect(storno.positionen[0]).not.toBe(buchungen[2].positionen[0])
   expect(
     auswerten([buchungen[1], umkehr(buchungen[1], '5', 5, '2026-11-02')]),
-  ).toEqual({ artikel: [], ware: 0, eingenommen: 0, ausgezahlt: 0, ausgegebeneGefaesse: 0, zurueckgenommeneGefaesse: 0 })
+  ).toEqual({ artikel: [], ware: 0, bar: 0, paypal: 0, eingenommen: 0, ausgezahlt: 0, ausgegebeneGefaesse: 0, zurueckgenommeneGefaesse: 0 })
 })
 it('führt zwölf Artikel mit Pfandgefäß, getrennte Glühwein-IDs und einen gemeinsamen Preis', () => {
   expect(produkte).toHaveLength(12)

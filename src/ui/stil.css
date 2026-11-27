@@ -258,12 +258,18 @@ select {
   display: inline-block; width: 1em; height: 1em; vertical-align: -.1em; background: currentColor;
   clip-path: polygon(7% 5%, 93% 5%, 76% 96%, 24% 96%, 7% 5%, 20% 15%, 34% 84%, 66% 84%, 80% 15%, 20% 15%);
 }
-.pfandtasten { display: flex; gap: .5rem; margin-top: 1rem; }
-.pfandtasten > button { flex: 1; min-width: 0; }
+.pfandtasten { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; margin-top: 1rem; }
+.pfandtasten > .produkt { grid-column: 2; }
+.pfandtasten > .minus-pfand { grid-column: 3; }
+@media (max-width: 32rem) {
+  .pfandtasten { grid-template-columns: 1fr; justify-items: center; }
+  .pfandtasten > .produkt, .pfandtasten > .minus-pfand { grid-column: 1; width: min(100%, 15rem); }
+  .pfandtasten > .minus-pfand { grid-row: 1; }
+}
 .pfandtasten .produkt { min-height: 3.5rem; padding: .3rem .6rem; }
 .pfandtasten .minus-pfand { margin: 0; flex-wrap: wrap; }
 .bestellung-aktiv { border-color: var(--akzent); box-shadow: inset 0 0 0 1px var(--akzent); }
-.sortiment h2, .zahlungsseite .rueckblick-titel { font: 650 1.05rem/1.25 system-ui, sans-serif; }
+.sortiment h2, .zahlungsseite .rueckblick-titel, .zahlungsseite .zahlungstitel { font: 650 1.05rem/1.25 system-ui, sans-serif; }
 @media (max-width: 24rem) {
   .position { grid-template-columns: auto minmax(0, 1fr); }
   .position .aktionen { grid-column: 2; justify-content: start; }

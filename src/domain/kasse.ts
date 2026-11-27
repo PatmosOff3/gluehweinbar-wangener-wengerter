@@ -1,5 +1,6 @@
 export type Cent = number
 export type Menge = number
+export type Zahlungsart = 'bar' | 'paypal'
 
 export function ganz(wert: number): number {
   if (!Number.isSafeInteger(wert))
@@ -61,6 +62,7 @@ export interface Bestand {
   summe: Cent
 }
 export interface Buchung extends Bestand {
+  zahlungsart?: Zahlungsart
   id: string
   eventId: string
   nummer: number
@@ -128,6 +130,13 @@ export function barzahlung(summe: Cent, gegeben: Cent) {
   return { gegeben, rueckgeld: summe > 0 ? gegeben - summe : 0 }
 }
 
+export function zahlungPruefen(summe: Cent, gegeben: Cent, art: Zahlungsart = 'bar') {
+  if (art === 'bar') return barzahlung(summe, gegeben)
+  if (ganz(summe) <= 0 || gegeben !== 0)
+    throw new Error('PayPal erfordert einen positiven Zahlbetrag ohne Bargeld.')
+  return { gegeben: 0, rueckgeld: 0 }
+}
+
 export function umkehr(
   verkauf: Buchung,
   id: string,
@@ -156,9 +165,13 @@ export function auswerten(buchungen: Buchung[]) {
   let ausgezahlt = 0
   let ausgegebeneGefaesse = 0
   let zurueckgenommeneGefaesse = 0
+  let bar = 0
+  let paypal = 0
   let ware = 0
   for (const buchung of buchungen) {
     const faktor = buchung.art === 'storno' ? -1 : 1
+    if (buchung.zahlungsart === 'paypal') paypal = ganz(paypal + faktor * buchung.summe)
+    else bar = ganz(bar + faktor * buchung.summe)
     ausgegebeneGefaesse = ganz(ausgegebeneGefaesse + faktor * (buchung.automatisch - buchung.vorhanden))
     zurueckgenommeneGefaesse = ganz(zurueckgenommeneGefaesse + faktor * buchung.rueckgaben)
     eingenommen = ganz(eingenommen + faktor * buchung.eingenommen)
@@ -181,6 +194,8 @@ export function auswerten(buchungen: Buchung[]) {
     artikel: [...artikel.values()].filter((p) => p.menge !== 0),
     ausgegebeneGefaesse,
     zurueckgenommeneGefaesse,
+    bar,
+    paypal,
     ware,
     eingenommen,
     ausgezahlt,

@@ -1,5 +1,29 @@
 import { expect, test } from '@playwright/test'
-import { einrichten, taste } from './bedienung'
+import { admin, einrichten, taste } from './bedienung'
+
+test('bestätigt eine externe PayPal-Zahlung und korrigiert die Statistik beim Storno', async ({ page }) => {
+  await einrichten(page)
+  await taste(page, /^Glas \/ Tasse/).click()
+  await taste(page, 'Zur Zahlung').click()
+  await expect(page.locator('.geldwahl button').last()).toHaveText('PayPal')
+  await taste(page, 'PayPal').click()
+  await taste(page, 'Abbrechen').click()
+  await taste(page, 'PayPal').click()
+  const dialog = page.getByRole('dialog', { name: 'PayPal-Zahlung bestätigen' })
+  await expect(dialog).toContainText('5,00 €')
+  await dialog.getByRole('button', { name: 'Vorgang abschließen' }).click()
+  await expect(page.getByRole('dialog', { name: 'Vorgang 1 gebucht.' })).toBeVisible()
+  await taste(page, 'Zur letzten Bestellung').click()
+  await expect(page.getByText('Per PayPal bezahlt')).toBeVisible()
+  await taste(page, 'Zurück zur Bestellung').click()
+  await admin(page)
+  const paypal = page.locator('dt').filter({ hasText: 'PayPal' }).locator('+ dd')
+  await expect(paypal).toHaveText('5,00 €')
+  await expect(page.locator('dt').filter({ hasText: 'Bar (inkl.' }).locator('+ dd')).toHaveText('0,00 €')
+  await taste(page, 'Letzten Verkauf stornieren').click()
+  await taste(page, 'Storno bestätigen').click()
+  await expect(paypal).toHaveText('0,00 €')
+})
 
 test('berechnet Flasche mit vier Gläsern und hält den Unterzahlungshinweis bei 2, sichtbar', async ({ page }) => {
   await einrichten(page)
@@ -61,7 +85,7 @@ test('zeigt Rückgeld im Dialog und die letzte bezahlte Bestellung ohne erneute 
   await taste(page, '20 €').click()
   await expect(dialog).toContainText('11,00 € Rückgeld')
   await abschluss.click()
-  await expect(page.getByText('Vorgang 2 gebucht.')).toBeVisible()
+  await expect(page.getByRole('dialog', { name: 'Vorgang 2 gebucht.' })).toBeVisible()
   await page.reload()
   await taste(page, 'Zur letzten Bestellung').click()
   await expect(page.getByRole('heading', { name: 'Letzte Bestellung · Vorgang 2' })).toBeVisible()

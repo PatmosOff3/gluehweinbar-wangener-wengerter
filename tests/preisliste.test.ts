@@ -27,8 +27,8 @@ it('ergänzt das Pfandgefäß einmalig und sichert Ware, Gefäßausgabe und Rüc
   expect(gefaesse).toHaveLength(1)
   const flasche = artikel.find(p => p.name === 'Wein' && p.einheit.includes('Flasche'))!
   const bestand = berechnen([{ artikel: flasche, menge: 1 }, { artikel: gefaesse[0], menge: 2 }], 350, 0, 1)
-  const verkauf = await verkaufen(db, id, crypto.randomUUID(), bestand, 2150)
-  expect(auswerten([verkauf])).toMatchObject({ ware: 1800, eingenommen: 700, ausgezahlt: 350,
+  const verkauf = await verkaufen(db, id, crypto.randomUUID(), bestand, 0, 'paypal')
+  expect(auswerten([verkauf])).toMatchObject({ paypal: 2150, bar: 0, ware: 1800, eingenommen: 700, ausgezahlt: 350,
     ausgegebeneGefaesse: 2, zurueckgenommeneGefaesse: 1 })
   await wiederherstellen(db, await sichern(db), true)
   expect(await db.transactions.get(verkauf.id)).toEqual(verkauf)

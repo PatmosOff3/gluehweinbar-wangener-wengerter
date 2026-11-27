@@ -40,6 +40,9 @@ test('hält das iPad-Layout in beiden Modi im Viewport und scrollt nur Bestellpo
         expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(48)
       }
       const pfand = (await page.locator('.minus-pfand').boundingBox())!
+      const reihe = (await page.locator('.pfandtasten').boundingBox())!
+      const gefaess = (await page.locator('.pfandtasten .produkt').boundingBox())!
+      expect(Math.abs(gefaess.x + gefaess.width / 2 - (reihe.x + reihe.width / 2))).toBeLessThan(1)
       const zahlleiste = (await page.locator('.summenleiste').boundingBox())!
       expect(pfand.y + pfand.height).toBeLessThanOrEqual(zahlleiste.y)
     }
@@ -92,7 +95,7 @@ test('erhält Bestellungen beim Themewechsel und zeigt Auszahlungen und Rückgel
   await expect(page.locator('.bestellsumme')).toHaveCSS('color', 'rgb(126, 220, 164)')
   await expect(page.locator('.bestellsumme')).toHaveText('+ 9,00 €')
   await taste(page, 'Zur Zahlung').click()
-  for (const button of await page.getByRole('group', { name: 'Erhaltenes Bargeld auswählen' }).getByRole('button').all())
+  for (const button of await page.getByRole('group', { name: 'Zahlung auswählen' }).getByRole('button').all())
     // Firefox kann 80 CSS-Pixel als 79,99997 zurückgeben.
     expect((await button.boundingBox())!.height + 0.01).toBeGreaterThanOrEqual(80)
   await taste(page, 'Hellmodus').click()

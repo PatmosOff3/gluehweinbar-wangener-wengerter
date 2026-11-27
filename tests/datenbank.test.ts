@@ -125,6 +125,8 @@ it('kopiert alle Einstellungen und sperrt nach Wechsel auch eine zweite offene V
     expect(kopie.every((p, i) => p.id !== vorher[i].id)).toBe(true)
     expect(await zweites.eventSettings.get(neu)).toMatchObject({ pfand: 300 })
     expect(await statistik(db, neu)).toEqual({
+      bar: 0,
+      paypal: 0,
       ausgegebeneGefaesse: 0,
       zurueckgenommeneGefaesse: 0,
       ware: 0,

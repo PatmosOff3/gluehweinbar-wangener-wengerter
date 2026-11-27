@@ -23,6 +23,12 @@ Eine über den Home-Bildschirm gestartete Web-App speichert ihre Buchungen separ
 
 „Zur letzten Bestellung“ auf dem ersten Kassenbildschirm zeigt die zuletzt abgeschlossene Bestellung dieser Veranstaltung mit den damals gebuchten Beträgen, erhaltenem Bargeld und Rückgeld. Der Rückblick bucht nichts erneut und bleibt nach einem Neustart verfügbar. Eine bereits begonnene neue Bestellung bleibt erhalten; „Zurück zur Bestellung“ bringt dich zu ihr zurück. Eine stornierte letzte Bestellung ist entsprechend gekennzeichnet.
 
+### Zahlung per PayPal erfassen
+
+Tippe auf der Bezahlseite nach „Anderer Betrag“ auf „PayPal“. Prüfe den Zahlungseingang in PayPal und tippe danach in der Kasse auf „Vorgang abschließen“. Der grüne Haken bestätigt die Buchung. Die Kasse zeigt ihn auch bei Barzahlungen mit Rückgeld.
+
+Statistik und CSV weisen Bar und PayPal jeweils einschließlich Pfand aus. Ein Storno korrigiert die Abrechnung in der Kasse. Eine erforderliche PayPal-Rückzahlung führst du separat in PayPal aus.
+
 ## Administration
 
 Öffne „Admin-Bereich“, gib die PIN ein und tippe „Entsperren“. Mit „Sperren und zur Kasse“ gibst du das Gerät wieder an die Helfer.

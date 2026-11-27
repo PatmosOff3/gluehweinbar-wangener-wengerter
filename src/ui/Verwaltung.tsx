@@ -254,6 +254,8 @@ export function Verwaltung({ aktivId }: { aktivId: string }) {
             <dd>{geld(s.eingenommen)} · {s.ausgegebeneGefaesse} Gläser/Tassen</dd>
             <dt>Ausgezahltes Pfand</dt>
             <dd className={s.ausgezahlt > 0 ? 'auszahlung' : ''}>{geld(s.ausgezahlt)} · {s.zurueckgenommeneGefaesse} Gläser/Tassen</dd>
+            <dt>Bar (inkl. Pfand und Auszahlungen)</dt><dd>{geld(s.bar)}</dd>
+            <dt>PayPal (inkl. Pfand)</dt><dd>{geld(s.paypal)}</dd>
           </dl>
           <h3>CSV-Abrechnung</h3>
           <p>

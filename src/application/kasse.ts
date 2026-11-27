@@ -1,6 +1,7 @@
 import {
   auswerten,
-  barzahlung,
+  zahlungPruefen,
+  type Zahlungsart,
   berechnen,
   positivOderNull,
   umkehr,
@@ -201,6 +202,7 @@ export async function verkaufen(
   id: string,
   entwurf: Bestand,
   gegeben: number,
+  zahlungsart: Zahlungsart = 'bar',
 ) {
   return db.transaction('rw', db.tables, async () => {
     const event = await aktiv(db, eventId)
@@ -229,7 +231,8 @@ export async function verkaufen(
       )
     const buchung: Buchung = {
       ...bestand,
-      ...barzahlung(bestand.summe, gegeben),
+      ...zahlungPruefen(bestand.summe, gegeben, zahlungsart),
+      zahlungsart,
       id,
       eventId,
       art: 'verkauf',

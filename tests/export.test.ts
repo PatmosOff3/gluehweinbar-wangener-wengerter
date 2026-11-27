@@ -26,6 +26,8 @@ describe('Dateiformate', () => {
       zurueckgenommeneGefaesse: 0,
       ausgezahlt: 0,
       ware: 350,
+      bar: 0,
+      paypal: 550,
     })
     expect(s.charCodeAt(0)).toBe(0xfeff)
     const felder: string[][] = []
@@ -39,5 +41,6 @@ describe('Dateiformate', () => {
     }
     expect(felder[1]).toEqual([name, artikel, '0,2 l', '1', '3,50'])
     expect(felder[3]).toEqual([name, 'Eingenommenes Pfand', '', '', '2,00'])
+    expect(felder.at(-1)).toEqual([name, 'PayPal (inkl. Pfand)', '', '', '5,50'])
   })
 })

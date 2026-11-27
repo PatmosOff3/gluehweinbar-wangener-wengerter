@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { barzahlung, berechnen, type Buchung } from '../domain/kasse'
+import { zahlungPruefen, berechnen, type Buchung } from '../domain/kasse'
 import type { KassenDB } from '../storage/db'
 import { finalePreisliste } from '../application/kasse'
 
@@ -37,6 +37,7 @@ const buchung = z.object({
   nummer: zahl.positive(),
   zeit,
   art: z.enum(['verkauf', 'storno']),
+  zahlungsart: z.enum(['bar', 'paypal']).optional(),
   storniertId: id.optional(),
   positionen: z.array(position),
   pfand: zahl,
@@ -113,7 +114,7 @@ function pruefeBuchung(b: Buchung) {
     'ausgezahlt',
   ] as const)
     pruefe(neu[feld] === b[feld])
-  pruefe(barzahlung(b.summe, b.gegeben).rueckgeld === b.rueckgeld)
+  pruefe(zahlungPruefen(b.summe, b.gegeben, b.zahlungsart).rueckgeld === b.rueckgeld)
   eindeutig(b.positionen.map((p) => p.id))
   pruefe(
     b.positionen.every(
@@ -165,6 +166,7 @@ function referenzen(d: Daten) {
     }
     const original = vorgaenge.get(b.storniertId ?? '')
     if (!original) throw new Error('Der Verkauf zum Storno fehlt.')
+    pruefe((b.zahlungsart ?? 'bar') === (original.zahlungsart ?? 'bar'))
     pruefe(
       original.art === 'verkauf' &&
         original.eventId === b.eventId &&
