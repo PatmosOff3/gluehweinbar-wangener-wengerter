@@ -30,6 +30,7 @@ export function dezimal(cent: Cent): string {
 export const geld = (cent: Cent) => dezimal(cent) + ' €'
 
 export interface Artikel {
+  nurPfand?: true
   id: string
   name: string
   einheit: string
@@ -79,13 +80,16 @@ export function berechnen(
   positivOderNull(pfand)
   positivOderNull(rueckgaben)
   let automatisch = 0
+  let getraenkeMitPfand = 0
   let ware = 0
   const positionen = zeilen.map(({ artikel, menge }) => {
     if (positivOderNull(menge) === 0) throw new Error('Leere Bestellposition.')
     const { id, name, einheit, preis, pflicht } = artikel
     ware = ganz(ware + ganz(positivOderNull(preis) * menge))
     if (pflicht) automatisch = ganz(automatisch + menge)
+    if (pflicht && !artikel.nurPfand) getraenkeMitPfand += menge
     return {
+      ...(artikel.nurPfand ? { nurPfand: true as const } : {}),
       id,
       name,
       einheit,
@@ -95,7 +99,7 @@ export function berechnen(
       pfandJeStueck: pflicht ? pfand : 0,
     }
   })
-  vorhanden = Math.min(automatisch, positivOderNull(vorhanden))
+  vorhanden = Math.min(getraenkeMitPfand, positivOderNull(vorhanden))
   const eingenommen = ganz((automatisch - vorhanden) * pfand)
   const ausgezahlt = ganz(rueckgaben * pfand)
   return {

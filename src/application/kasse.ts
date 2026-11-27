@@ -8,7 +8,7 @@ import {
   type Buchung,
   type Produkt,
 } from '../domain/kasse'
-import { preisgruppe, standardsortiment, SORTIMENTSSTAND } from '../domain/sortiment'
+import { pfandgefaess, preisgruppe, standardsortiment, SORTIMENTSSTAND } from '../domain/sortiment'
 import { type KassenDB, type Veranstaltung } from '../storage/db'
 import type { Pin } from './pin'
 
@@ -78,8 +78,12 @@ export async function finalePreisliste(db: KassenDB) {
     const einstellungen = await db.eventSettings.get(eventId)
     if (event?.status !== 'active' || !einstellungen)
       throw new Error('Die aktive Veranstaltung oder ihre Pfandeinstellungen fehlen.')
-    if (einstellungen.sortimentsstand === SORTIMENTSSTAND) return
     const bisher = await sortiment(db, eventId)
+    if (einstellungen.sortimentsstand === SORTIMENTSSTAND) {
+      if (!bisher.some((p) => p.nurPfand))
+        await db.products.add(pfandgefaess(eventId, neueId(), (bisher.at(-1)?.sortierung ?? -1) + 1))
+      return
+    }
     const vorgaben = standardsortiment(eventId, neueId)
     const gluehweine = bisher.filter((p) => /^Glühwein (rot|weiß)$/.test(p.name) && ['', '0,2 l'].includes(p.einheit))
     const alteGruppe = gluehweine.find((p) => p.gruppe)?.gruppe
@@ -88,7 +92,7 @@ export async function finalePreisliste(db: KassenDB) {
       bisher.every((p) => p.gruppe !== alteGruppe || gluehweine.includes(p))
       ? alteGruppe : neueId()
     const aenderungen = vorgaben.map((v) => {
-      const treffer = bisher.filter((p) => p.name === v.name &&
+      const treffer = bisher.filter((p) => p.nurPfand === v.nurPfand && p.name === v.name &&
         (p.einheit === v.einheit || (/^Glühwein (rot|weiß)$/.test(v.name) && p.einheit === '0,2 l')))
       // Unbekannte oder mehrdeutige Artikel werden nicht überschrieben.
       const alt = treffer.length === 1 ? treffer[0] : undefined

@@ -31,7 +31,7 @@ export function standardsortiment(
   neueId: () => string,
 ): Produkt[] {
   const gruppe = neueId()
-  return vorgaben.map(([name, einheit, preis, pflicht, symbol, alkohol], sortierung) => ({
+  const produkte = vorgaben.map(([name, einheit, preis, pflicht, symbol, alkohol], sortierung) => ({
     id: neueId(),
     eventId,
     name,
@@ -44,6 +44,12 @@ export function standardsortiment(
     sortierung,
     ...(sortierung < 2 ? { gruppe } : {}),
   }))
+  return [...produkte, pfandgefaess(eventId, neueId(), produkte.length)]
+}
+
+export function pfandgefaess(eventId: string, id: string, sortierung: number): Produkt {
+  return { eventId, id, sortierung, name: 'Glas / Tasse', einheit: '', preis: 0,
+    pflicht: true, nurPfand: true, aktiv: true }
 }
 
 export function preisgruppe(produkte: Produkt[], neu: Produkt): Produkt[] {

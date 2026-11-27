@@ -94,10 +94,10 @@ it('summiert gebuchte Positionen und beide Pfandsummen unabhängig vom Wechselge
     auswerten([buchungen[1], umkehr(buchungen[1], '5', 5, '2026-11-02')]),
   ).toEqual({ artikel: [], ware: 0, eingenommen: 0, ausgezahlt: 0, ausgegebeneGefaesse: 0, zurueckgenommeneGefaesse: 0 })
 })
-it('führt elf finale Artikel, getrennte Glühwein-IDs und einen gemeinsamen Preis', () => {
-  expect(produkte).toHaveLength(11)
+it('führt zwölf Artikel mit Pfandgefäß, getrennte Glühwein-IDs und einen gemeinsamen Preis', () => {
+  expect(produkte).toHaveLength(12)
   expect(produkte.map((p) => p.preis)).toEqual([
-    400, 400, 300, 300, 600, 1800, 200, 200, 1800, 1800, 800,
+    400, 400, 300, 300, 600, 1800, 200, 200, 1800, 1800, 800, 0,
   ])
   expect(produkte.map((p) => p.pflicht)).toEqual([
     true,
@@ -111,6 +111,7 @@ it('führt elf finale Artikel, getrennte Glühwein-IDs und einen gemeinsamen Pre
     false,
     false,
     false,
+    true,
   ])
   expect(
     preisgruppe(produkte, { ...rot, preis: 400 }).map((p) => [p.id, p.preis]),

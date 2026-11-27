@@ -21,6 +21,13 @@ function produktfarbe(name: string) {
   return ''
 }
 
+function Produktsymbol({ produkt }: { produkt?: Produkt }) {
+  if (!produkt) return null
+  if (produkt.nurPfand) return <span className="glas-symbol" aria-hidden="true" />
+  const { symbol } = kachelmerkmale(produkt)
+  return symbol ? <span aria-hidden="true">{symbol}</span> : null
+}
+
 export function Kasse({
   eventId,
   offenMelden,
@@ -60,19 +67,20 @@ export function Kasse({
   const hauptprodukte = produkte
     .filter((p) => prioritaet.includes(p.name))
     .sort((a, b) => prioritaet.indexOf(a.name) - prioritaet.indexOf(b.name))
-  const weitere = produkte.filter((p) => !prioritaet.includes(p.name))
+  const weitere = produkte.filter((p) => !prioritaet.includes(p.name) && !p.nurPfand)
+  const gefaess = produkte.find((p) => p.nurPfand)
   const zeilen = produkte
     .filter((p) => mengen[p.id] > 0)
     .map((artikel) => ({ artikel, menge: mengen[artikel.id] }))
-  const automatisch = zeilen.reduce(
-    (n, z) => n + (z.artikel.pflicht ? z.menge : 0),
+  const getraenkeMitPfand = zeilen.reduce(
+    (n, z) => n + (z.artikel.pflicht && !z.artikel.nurPfand ? z.menge : 0),
     0,
   )
   const b = berechnen(
     zeilen,
     daten?.pfand ?? 0,
-    Math.min(minus, automatisch),
-    Math.max(0, minus - automatisch),
+    Math.min(minus, getraenkeMitPfand),
+    Math.max(0, minus - getraenkeMitPfand),
   )
   const offen = !!(b.positionen.length || minus || zahlung)
   useEffect(() => {
@@ -93,6 +101,7 @@ export function Kasse({
   if (zahlung)
     return (
       <Zahlung
+        produkte={daten.produkte}
         bestand={zahlung}
         zurueck={() => bezahlen(undefined)}
         erfolgsmeldung={passendGebucht ? meldung : ''}
@@ -107,7 +116,7 @@ export function Kasse({
       />
     )
   function produkttaste(p: Produkt) {
-    const { symbol, alkohol } = kachelmerkmale(p)
+    const { alkohol } = kachelmerkmale(p)
     return (
       <button
         key={p.id}
@@ -115,12 +124,12 @@ export function Kasse({
         onClick={() => menge(p.id, (mengen[p.id] ?? 0) + 1)}
       >
         <span className="produktname">
-          {symbol && <span aria-hidden="true">{symbol}</span>}
+          <Produktsymbol produkt={p} />
           <strong>{p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}</strong>
         </span>
         {p.einheit && <small>{p.einheit}</small>}
         <span className="produktzeile">
-          <span>{geld(p.preis)}</span>
+          <span>{geld(p.nurPfand ? b.pfand : p.preis)}{p.nurPfand && ' Pfand'}</span>
           {alkohol && <abbr title="Alkoholhaltig">ALK</abbr>}
         </span>
       </button>
@@ -135,12 +144,15 @@ export function Kasse({
             <div className="hauptprodukte">{hauptprodukte.map(produkttaste)}</div>
           )}
           <div className="produkte">{weitere.map(produkttaste)}</div>
-          <button
-            className="minus-pfand"
-            onClick={() => { minusSetzen((v) => v + 1); melden('') }}
-          >
-            − Pfand <span>− {geld(b.pfand)}</span>
-          </button>
+          <div className="pfandtasten">
+            {gefaess && produkttaste(gefaess)}
+            <button
+              className="minus-pfand"
+              onClick={() => { minusSetzen((v) => v + 1); melden('') }}
+            >
+              − Pfand <span>− {geld(b.pfand)}</span>
+            </button>
+          </div>
         </section>
         <section aria-label="Offene Bestellung" className={'bestellung' + (offen ? ' bestellung-aktiv' : '')}>
           <p className={'bestellsumme' + (b.summe < 0 ? ' auszahlung' : b.summe > 0 ? ' einnahme' : '')}>
@@ -152,23 +164,25 @@ export function Kasse({
               <div className={'position' + produktfarbe(p.name)} key={p.id}>
                 <strong className="positionsmenge">{anzahl}×</strong>
                 <div className="positionsartikel">
-                  <strong><span aria-hidden="true">{kachelmerkmale(p).symbol}</span>{' '}
+                  <strong><Produktsymbol produkt={p} />{' '}
                     {p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}
                   </strong>
-                  <small>{p.einheit && p.einheit + ' · '}{geld(p.preis)}</small>
+                  <small>{p.einheit && p.einheit + ' · '}{geld(p.nurPfand ? b.pfand : p.preis)}{p.nurPfand && ' Pfand'}</small>
                 </div>
                 <div className="aktionen">
                   {anzahl > 1 && <button
+                    className="menge-verringern"
                     aria-label={p.name + ' verringern'}
                     onClick={() => menge(p.id, anzahl - 1)}
                   >
                     −
                   </button>}
                   <button
+                    className="position-entfernen"
                     aria-label={p.name + ' entfernen'}
                     onClick={() => menge(p.id, 0)}
                   >
-                    Entfernen
+                    ×
                   </button>
                 </div>
               </div>
@@ -227,7 +241,7 @@ function LetzteBestellung({ buchung, storniert, zurueck }: { buchung: Buchung; s
     <p>{storniert ? 'Storniert' : 'Bereits abgeschlossen'} · {new Date(buchung.zeit).toLocaleString('de-DE')}</p>
     <section className="zahlungszusammenfassung">
       <h3>Bestellung</h3>
-      {buchung.positionen.map((p) => <div className="zahlungsposition" key={p.id}><span>{p.menge} × {p.name} {p.einheit}</span><strong>{geld(p.menge * p.preis)}</strong></div>)}
+      {buchung.positionen.map((p) => <div className="zahlungsposition" key={p.id}><span>{p.menge} × {p.name} {p.einheit}</span><strong>{geld(p.menge * (p.nurPfand ? p.pfandJeStueck : p.preis))}{p.nurPfand && ' Pfand'}</strong></div>)}
       <dl>
         <dt>Automatisches Pfand · {buchung.automatisch}×</dt><dd>{geld(buchung.automatisch * buchung.pfand)}</dd>
         <dt>− Pfand · {buchung.vorhanden + buchung.rueckgaben}×</dt><dd className="auszahlung">{geld(-(buchung.vorhanden + buchung.rueckgaben) * buchung.pfand)}</dd>
@@ -268,10 +282,11 @@ function Ziffernblock({ startwert, summe, abbrechen, uebernehmen }: {
   const [wert, setzen] = useState(startwert)
   let gueltig = false
   let hinweis = ''
-  if (wert && !wert.endsWith(',')) {
+  if (wert) {
     try {
-      barzahlung(summe, euroEingabe(wert))
-      gueltig = true
+      const centFehlen = wert.endsWith(',')
+      barzahlung(summe, euroEingabe(centFehlen ? wert + '0' : wert))
+      gueltig = !centFehlen
     } catch (fehler) {
       hinweis = (fehler as Error).message
     }
@@ -301,7 +316,7 @@ function Ziffernblock({ startwert, summe, abbrechen, uebernehmen }: {
             onClick={() => tippen(taste)}>{taste === 'Backspace' ? '⌫' : taste}</button>
         )}
       </div>
-      {hinweis && <p role="status">{hinweis}</p>}
+      <p className="betragsmeldung" role="status">{hinweis}</p>
       <div className="aktionen">
         <button onClick={abbrechen}>Abbrechen</button>
         <button className="primaer" disabled={!gueltig} onClick={() => uebernehmen(wert)}>Rückgeld anzeigen</button>
@@ -349,11 +364,13 @@ function Bestellpositionen({ children }: { children: ReactNode }) {
 
 function Zahlung({
   bestand,
+  produkte,
   zurueck,
   buchen,
   erfolgsmeldung,
 }: {
   bestand: Bestand
+  produkte: Produkt[]
   zurueck: () => void
   buchen: (gegeben: number, id: string, passend?: boolean) => Promise<void>
   erfolgsmeldung: string
@@ -385,13 +402,14 @@ function Zahlung({
       <section className="zahlungszusammenfassung">
         <h3>Bestellung</h3>
         {bestand.positionen.map((p) => (
-          <div className="zahlungsposition" key={p.id}>
+          <div className={'zahlungsposition zahlungsartikel' + produktfarbe(p.name)} key={p.id}>
+            <strong className="positionsmenge">{p.menge}×</strong>
             <span>
-              {p.menge} ×{' '}
+              <Produktsymbol produkt={produkte.find((artikel) => artikel.id === p.id)} />{' '}
               {p.name === 'Apfelsaftschorle' ? 'Apfelschorle' : p.name}{' '}
               {p.einheit}
             </span>
-            <strong>{geld(p.preis * p.menge)}</strong>
+            <strong>{geld((p.nurPfand ? p.pfandJeStueck : p.preis) * p.menge)}{p.nurPfand && ' Pfand'}</strong>
           </div>
         ))}
         <dl>

@@ -249,6 +249,19 @@ select {
 .positionsartikel small { display: block; }
 .positionsmenge { font-size: 1.45rem; font-variant-numeric: tabular-nums; }
 .position .aktionen { justify-content: end; }
+.position .position-entfernen, .position .menge-verringern {
+  min-width: 3rem; font-size: 1.45rem; line-height: 1; padding: .35rem;
+}
+.position .position-entfernen { color: var(--auszahlung); background: var(--flaeche); }
+.position .menge-verringern { min-width: 3.2rem; min-height: 3.2rem; }
+.glas-symbol {
+  display: inline-block; width: 1em; height: 1em; vertical-align: -.1em; background: currentColor;
+  clip-path: polygon(7% 5%, 93% 5%, 76% 96%, 24% 96%, 7% 5%, 20% 15%, 34% 84%, 66% 84%, 80% 15%, 20% 15%);
+}
+.pfandtasten { display: flex; gap: .5rem; margin-top: 1rem; }
+.pfandtasten > button { flex: 1; min-width: 0; }
+.pfandtasten .produkt { min-height: 3.5rem; padding: .3rem .6rem; }
+.pfandtasten .minus-pfand { margin: 0; flex-wrap: wrap; }
 .bestellung-aktiv { border-color: var(--akzent); box-shadow: inset 0 0 0 1px var(--akzent); }
 .sortiment h2, .zahlungsseite .rueckblick-titel { font: 650 1.05rem/1.25 system-ui, sans-serif; }
 @media (max-width: 24rem) {
@@ -312,6 +325,10 @@ footer {
 .zahlungsseite { max-width: 72rem; margin: auto; }
 .zahlungszusammenfassung { font-size: 1.25rem; }
 .zahlungsposition { display: flex; justify-content: space-between; gap: 1rem; padding: .3rem 0; }
+.zahlungsartikel { align-items: center; padding: .45rem .6rem; gap: .6rem; border-radius: .4rem; margin-block: .2rem; }
+.zahlungsartikel > span { flex: 1; }
+.zahlungsartikel > strong:last-child { text-align: right; }
+.ziffern-popup .betragsmeldung { margin: .4rem 0; min-height: 1.5em; }
 .rueckgeld { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; color: var(--auszahlung); background: var(--auszahlungsgrund); padding: .8rem 1rem; border-radius: .6rem; }
 .zahlungsseite .gross { font-size: 2rem; font-weight: 800; }
 [hidden] { display: none !important; }
@@ -414,7 +431,8 @@ button.gluehwein-weiss:hover:enabled { background: #e4c268; }
   .produkte .produkt { min-height: 5.3rem; padding: .4rem .5rem; }
   .produkte .produktname { font-size: .94rem; line-height: 1.2; }
   .hauptprodukte .produkt { min-height: 6.5rem; padding: .6rem; }
-  .minus-pfand { margin-top: auto; min-height: 3.5rem; padding: .5rem .7rem; font-size: 1.3rem; }
+  .pfandtasten { margin-top: auto; }
+  .minus-pfand { min-height: 3.5rem; padding: .5rem .7rem; font-size: 1.3rem; }
   .bestellung { display: flex; flex-direction: column; gap: .4rem; }
   .bestellsumme { margin: 0 0 .3rem; font-size: 1.8rem; }
   .bestellpositionen { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: .2rem; }
@@ -433,6 +451,8 @@ button.gluehwein-weiss:hover:enabled { background: #e4c268; }
   #root:has(.kassenhaupt) > aside, #root:has(.kassenhaupt) > p { margin: 0; padding-block: .2rem; flex-shrink: 0; }
 }
 @media (min-width: 48rem) and (orientation: landscape) and (max-height: 40rem) {
+  .produkte { row-gap: .3rem; }
+  .hauptprodukte { margin-bottom: .4rem; }
   .hauptprodukte .produkt { min-height: 5.5rem; padding: .4rem .5rem; }
   .produkte .produkt { min-height: 4.75rem; }
 }

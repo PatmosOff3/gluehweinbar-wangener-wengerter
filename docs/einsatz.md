@@ -42,7 +42,7 @@ Messung im emulierten iPad-WebKit mit je einem Stück aller elf Standardartikel,
 | 1105 × 604 | 170 → 211 px | 1 → 3 |
 | 1024 × 600 | 166 → 207 px | 1 → 3 |
 
-- [ ] Auf dem echten iPad mit eingeblendeten Safari-Leisten und als installierte PWA prüfen: alle elf Standardartikel, Minus-Pfand und Zur Zahlung sind ohne Seitenscrollen sichtbar.
+- [ ] Auf dem echten iPad mit eingeblendeten Safari-Leisten und als installierte PWA prüfen, ob alle zwölf Standardartikel einschließlich „Glas / Tasse“, Minus-Pfand und „Zur Zahlung“ ohne Seitenscrollen sichtbar sind.
 - [ ] Auf dem echten iPad in Safari und über das Home-Bildschirm-Symbol einen Verkauf über 9 € öffnen. „Anderer Betrag“ antippen, 12,50 € eingeben und 3,50 € Rückgeld prüfen. Über „Bargeld ändern“ mit der Rücktaste korrigieren und abbrechen. Währenddessen bleibt die iPad-Systemtastatur geschlossen. Geräteprüfung ausstehend.
 - [ ] Alle Artikel einmal erfassen: Nur die Positionsliste der offenen Bestellung scrollt. Summe, Pfandübersicht und Bestellaktionen bleiben sichtbar; auch die letzte Position kann entfernt werden.
 - [ ] Ohne Admin-PIN zwischen Dunkelmodus und Hellmodus wechseln; Lesbarkeit, Rot-/Weiß-Unterscheidung und rote Auszahlungsbeträge einschließlich Rückgeld prüfen.

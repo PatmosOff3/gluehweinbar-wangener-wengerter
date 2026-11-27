@@ -6,7 +6,7 @@ test('hält das iPad-Layout in beiden Modi im Viewport und scrollt nur Bestellpo
   await page.setViewportSize({ width: 1105, height: 688 })
   await einrichten(page)
   await expect(page.getByText('Offline bereit', { exact: true })).toBeVisible()
-  await expect(page.locator('.produkt')).toHaveCount(11)
+  await expect(page.locator('.produkt')).toHaveCount(12)
   await expect(page.locator('.produkt abbr')).toHaveCount(9)
   await expect(page.locator('.produkt abbr').first()).toHaveText('ALK')
   expect(await page.locator('.produkt abbr').first().evaluate(el => {

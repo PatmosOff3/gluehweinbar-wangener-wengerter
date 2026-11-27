@@ -166,15 +166,16 @@ it('bewahrt gebuchte Werte bei Preis-, Namens-, Pfand- und Verfügbarkeitsänder
   expect(csv('Fest', s)).not.toContain('Fassbier')
 })
 it('legt individuelle Produkte an, aktualisiert und filtert sie', async () => {
+  const vorher = await sortiment(db, id)
   const honig = {
-    ...(await sortiment(db, id))[5],
+    ...vorher[5],
     id: crypto.randomUUID(),
     name: 'Testartikel',
     einheit: '',
     preis: 123,
   }
   await produktSpeichern(db, honig)
-  expect(await sortiment(db, id)).toHaveLength(12)
+  expect(await sortiment(db, id)).toHaveLength(vorher.length + 1)
   await expect(produktSpeichern(db, { ...honig, preis: -1 })).rejects.toThrow()
   await expect(produktSpeichern(db, { ...honig, name: ' ' })).rejects.toThrow()
   expect((await db.products.get(honig.id))?.preis).toBe(123)

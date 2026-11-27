@@ -8,6 +8,7 @@ const id = z.uuid()
 const name = z.string().refine((s) => !!s.trim())
 const zeit = z.iso.datetime()
 const artikel = z.object({
+  nurPfand: z.literal(true).optional(),
   id,
   name,
   einheit: z.string(),
@@ -139,6 +140,7 @@ function referenzen(d: Daten) {
   pruefe(d.events.every((e) => (e.status === 'closed' ? !!e.ende : !e.ende)))
   const gruppen = new Map<string, string>()
   for (const p of d.products) {
+    if (p.nurPfand) pruefe(p.preis === 0 && p.pflicht && !p.gruppe)
     pruefe(events.has(p.eventId))
     if (!p.gruppe) continue
     const einstellung = JSON.stringify([p.eventId, p.preis, p.einheit])
@@ -156,6 +158,7 @@ function referenzen(d: Daten) {
     nummern.set(b.eventId, folge)
     pruefe(b.positionen.every((p) => produkte.get(p.id)?.eventId === b.eventId))
     pruefeBuchung(b)
+    pruefe(b.positionen.every((p) => !p.nurPfand || (p.preis === 0 && p.pflicht)))
     if (b.art === 'verkauf') {
       pruefe(!b.storniertId)
       continue

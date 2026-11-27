@@ -18,6 +18,23 @@ beforeEach(async () => {
 })
 afterEach(async () => { await db.delete() })
 
+it('ergänzt das Pfandgefäß einmalig und sichert Ware, Gefäßausgabe und Rückgabe getrennt', async () => {
+  const artikel = await sortiment(db, id)
+  await db.products.delete(artikel.find(p => p.nurPfand)!.id)
+  await pfandSetzen(db, id, 350)
+  await Promise.all([finalePreisliste(db), finalePreisliste(db)])
+  const gefaesse = (await sortiment(db, id)).filter(p => p.nurPfand)
+  expect(gefaesse).toHaveLength(1)
+  const flasche = artikel.find(p => p.name === 'Wein' && p.einheit.includes('Flasche'))!
+  const bestand = berechnen([{ artikel: flasche, menge: 1 }, { artikel: gefaesse[0], menge: 2 }], 350, 0, 1)
+  const verkauf = await verkaufen(db, id, crypto.randomUUID(), bestand, 2150)
+  expect(auswerten([verkauf])).toMatchObject({ ware: 1800, eingenommen: 700, ausgezahlt: 350,
+    ausgegebeneGefaesse: 2, zurueckgenommeneGefaesse: 1 })
+  await wiederherstellen(db, await sichern(db), true)
+  expect(await db.transactions.get(verkauf.id)).toEqual(verkauf)
+  expect((await sortiment(db, id)).filter(p => p.nurPfand)).toEqual(gefaesse)
+})
+
 async function vorlaeufig() {
   const artikel = await sortiment(db, id)
   await db.products.bulkDelete(artikel.filter((p) => p.name.startsWith('Tresterbrand') || p.name === 'Honig').map((p) => p.id))
@@ -104,7 +121,7 @@ it('übernimmt auch eine echte v1-Sicherung und erzeugt ein wieder lesbares fina
   const stand = sicherungLesen(await sichern(db))
   expect(stand.eventSettings[0]).toMatchObject({ pfand: 500, sortimentsstand: 'weihnachtsmarkt-2026-final' })
   // Die Fixture hat zwei eigene Verkaufseinheiten; diese Artikel bleiben erhalten.
-  expect(stand.products.filter((p) => p.aktiv)).toHaveLength(13)
+  expect(stand.products.filter((p) => p.aktiv)).toHaveLength(14)
   for (const alt of sicherungLesen(text).products)
     expect(stand.products.find((p) => p.id === alt.id)).toMatchObject({ name: alt.name, einheit: alt.einheit, preis: alt.preis })
 })

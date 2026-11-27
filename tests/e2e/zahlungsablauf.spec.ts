@@ -1,12 +1,33 @@
 import { expect, test } from '@playwright/test'
 import { einrichten, taste } from './bedienung'
 
+test('berechnet Flasche mit vier Gläsern und hält den Unterzahlungshinweis bei 2, sichtbar', async ({ page }) => {
+  await einrichten(page)
+  await taste(page, /^Wein Flasche/).click()
+  const glas = taste(page, /^Glas \/ Tasse 5,00 € Pfand/)
+  for (let i = 0; i < 4; i++) await glas.click()
+  await expect(page.locator('.bestellsumme')).toHaveText('+ 38,00 €')
+  await taste(page, 'Zur Zahlung').click()
+  const position = page.locator('.zahlungsartikel').filter({ hasText: 'Glas / Tasse' })
+  await expect(position.locator('.positionsmenge')).toHaveText('4×')
+  await expect(position.locator('.glas-symbol')).toBeVisible()
+  await expect(page.locator('.zahlungsartikel').filter({ hasText: 'Wein' })).toContainText('🍾')
+  await taste(page, 'Anderer Betrag').click()
+  const dialog = page.getByRole('dialog')
+  for (const taste of '2,99') {
+    await dialog.getByRole('button', { name: taste, exact: true }).click()
+    await expect(dialog).toContainText('Der gegebene Betrag reicht nicht aus.')
+    await expect(dialog.getByRole('button', { name: 'Rückgeld anzeigen' })).toBeDisabled()
+  }
+})
+
 test('zeigt Rückgeld im Dialog und die letzte bezahlte Bestellung ohne erneute Buchung', async ({ page }, info) => {
   await page.setViewportSize({ width: 1024, height: 600 })
   await einrichten(page)
   await expect(taste(page, 'Zur letzten Bestellung')).toBeDisabled()
   await taste(page, /^Glühwein rot \d/).click()
   await taste(page, 'Zur Zahlung').click()
+  await expect(page.locator('.zahlungsartikel.gluehwein-rot')).toHaveCSS('background-color', 'rgb(121, 44, 68)')
   await taste(page, '10 €').click()
   const dialog = page.getByRole('dialog', { name: 'Rückgeld', exact: true })
   await expect(dialog).toBeVisible()

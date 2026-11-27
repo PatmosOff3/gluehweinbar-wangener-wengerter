@@ -303,9 +303,9 @@ export function Verwaltung({ aktivId }: { aktivId: string }) {
                   <strong>
                     {p.name} {p.einheit}
                   </strong>{' '}
-                  · {geld(p.preis)} · {p.aktiv ? 'Verfügbar' : 'Ausverkauft'}
+                  · {p.nurPfand ? geld(daten.pfand ?? 0) + ' Pfand' : geld(p.preis)} · {p.aktiv ? 'Verfügbar' : 'Ausverkauft'}
                   <div>
-                    <button onClick={() => bearbeiten(p)}>Bearbeiten</button>
+                    {!p.nurPfand && <button onClick={() => bearbeiten(p)}>Bearbeiten</button>}
                     <button
                       onClick={() =>
                         void aktion.ausfuehren(() =>

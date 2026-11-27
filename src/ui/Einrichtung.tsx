@@ -68,8 +68,8 @@ export function Einrichtung() {
           <ul>
             {sortiment.map((p) => (
               <li key={p.id}>
-                {p.name}{p.einheit && ' · ' + p.einheit} · {geld(p.preis)}
-                {p.pflicht && ' + Pfand'}
+                {p.name}{p.einheit && ' · ' + p.einheit} · {p.nurPfand ? 'Pfand pro Gefäß' : geld(p.preis)}
+                {p.pflicht && !p.nurPfand && ' + Pfand'}
               </li>
             ))}
           </ul>

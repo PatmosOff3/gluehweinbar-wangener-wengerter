@@ -2,12 +2,18 @@
 
 ## Kasse vorbereiten
 
-Öffne die endgültige HTTPS-Adresse online im normalen Browserprofil des Kassengeräts. Gib einen Veranstaltungsnamen ein, wähle eine lokale Admin-PIN mit 4 bis 12 Ziffern und kontrolliere den Pfandbetrag pro Gefäß. Klappe „Standardsortiment prüfen“ auf, prüfe die elf Artikel und bestätige die Übernahme. Nach „Kasse einrichten“ siehst du das Sortiment. Warte auf „Offline bereit“. Im Admin-Bereich steht eine Warnung, falls der Browser den dauerhaften Speicher nicht bestätigt.
+Öffne die endgültige HTTPS-Adresse online im normalen Browserprofil des Kassengeräts. Gib einen Veranstaltungsnamen ein, wähle eine lokale Admin-PIN mit 4 bis 12 Ziffern und kontrolliere den Pfandbetrag pro Gefäß. Klappe „Standardsortiment prüfen“ auf, prüfe die zwölf Artikel und bestätige die Übernahme. Nach „Kasse einrichten“ siehst du das Sortiment. Warte auf „Offline bereit“. Im Admin-Bereich steht eine Warnung, falls der Browser den dauerhaften Speicher nicht bestätigt.
+
+### Auf dem iPad nach einem Test frisch beginnen
+
+Lege unter **Einstellungen → Apps → Safari → Neues Profil** ein Safari-Profil für die neue Kasse an. Öffne Safari, tippe oben links auf den Profilnamen und wähle unter „Profil“ das neue Profil aus. Rufe die Kassenadresse in einem neuen Tab auf. Sobald „Veranstaltungsname“ und „Admin-PIN“ erscheinen, kannst du eine neue Veranstaltung mit eigener PIN anlegen.
+
+Eine über den Home-Bildschirm gestartete Web-App speichert ihre Buchungen separat. Wenn du künftig über das App-Symbol kassierst und die alten Testbuchungen verwerfen möchtest, lösche das alte Kassen-Symbol. Füge die Kasse aus Safari über **Teilen → Zum Home-Bildschirm** erneut hinzu. Öffne das neue Symbol und richte die Veranstaltung dort ein.
 
 ## Bargeld und Gefäße
 
-1. Tippe für jedes Stück einmal auf die Produkttaste. Symbole unterscheiden Weinglas, Shot und Flasche. Roten und weißen Glühwein erkennst du auch in der Bestellung an der Farbe. Das rote „ALK“ im Kreis kennzeichnet alkoholhaltige Getränke. Die große Zahl links in der Bestellzeile zeigt die Menge. Ab zwei Stück kannst du sie mit „−“ verringern. „Entfernen“ löscht die ganze Position.
-2. Für eine neue Tasse zählt das Pfand automatisch. Für ein mitgebrachtes Gefäß tippe einmal „− Pfand“.
+1. Tippe für jedes Stück einmal auf die Produkttaste. Symbole unterscheiden Weinglas, Shot und Flasche. Roten und weißen Glühwein erkennst du auch in der Bestellung und auf der Zahlungsseite an der Farbe. Das rote „ALK“ im Kreis kennzeichnet alkoholhaltige Getränke. Die große Zahl links zeigt die Menge. Ab zwei Stück kannst du sie mit „−“ verringern. Das rote × entfernt die ganze Position.
+2. Für ein pfandpflichtiges Getränk zählt das Gefäß automatisch. Für ein mitgebrachtes Gefäß tippe einmal „− Pfand“. Gibt der Stand ein zusätzliches leeres Glas oder eine Tasse aus, tippe für jedes auf „Glas / Tasse“. Die Taste berechnet den aktuellen Pfandbetrag. Eine Weinflasche zu 18 € mit vier zusätzlichen Gläsern zu je 5 € Pfand ergibt 38 €.
 3. Für jedes zusätzlich zurückgegebene leere Gefäß tippe ebenfalls „− Pfand“. Zusätzliche Abzüge zählen als ausgezahltes Pfand. Das funktioniert auch ohne Warenkauf. Über die Korrekturtaste in der Bestellung kannst du einen Pfandabzug zurücknehmen.
 4. Prüfe den Betrag oben im umrahmten Bestellbereich und öffne „Zur Zahlung“. Hat der Gast passend bezahlt, tippe einmal auf „Passend“. Nach dem Speichern bestätigt ein grünes Häkchen mit Vorgangsnummer den Verkauf auf der Zahlungsseite. Die leere Kasse erscheint automatisch.
 5. Bei Wechselgeld wähle den erhaltenen Schein. „Anderer Betrag“ öffnet den Ziffernblock der Kasse. Für 20 € tippe auf 2 und 0, für 12,50 € auf 1, 2, Komma, 5 und 0. Mit der Rücktaste korrigierst du die letzte Stelle. „Rückgeld anzeigen“ übernimmt den Betrag. Über „Bargeld ändern“ kannst du ihn nochmals anpassen. Gib das Rückgeld heraus und tippe auf „Vorgang abschließen“. Nullbeträge und Auszahlungen schließt du direkt ab.
