@@ -382,6 +382,7 @@ function Zahlung({
   const [text, eingeben] = useState('')
   const [popup, popupZeigen] = useState<'ziffern' | 'rueckgeld' | 'paypal'>()
   const aktion = useAktion()
+  const berechnetesPfand = bestand.eingenommen - bestand.ausgezahlt
   let gegeben = 0
   let hinweis = ''
   let gueltig = false
@@ -421,6 +422,8 @@ function Zahlung({
           <dd className={bestand.vorhanden + bestand.rueckgaben > 0 ? 'auszahlung' : ''}>
             {geld(-(bestand.vorhanden + bestand.rueckgaben) * bestand.pfand)}
           </dd>
+          <dt>Berechnetes Pfand</dt>
+          <dd className={berechnetesPfand < 0 ? 'auszahlung' : ''}><strong>{geld(berechnetesPfand)}</strong></dd>
         </dl>
       </section>
       <p className={'gross' + (bestand.summe < 0 ? ' auszahlung' : bestand.summe > 0 ? ' einnahme' : '')}>
@@ -428,20 +431,24 @@ function Zahlung({
       </p>
       {bestand.summe > 0 && (
         <div className="geldwahl" role="group" aria-label="Zahlung auswählen">
-          <button disabled={aktion.beschaeftigt || !!erfolgsmeldung} onClick={() => void aktion.ausfuehren(() => buchen(bestand.summe, id))}>Passend</button>
-          {schnellbetraege.map((c) => (
-            <button key={c} disabled={aktion.beschaeftigt} aria-pressed={wahl === c} onClick={() => { waehlen(c); popupZeigen('rueckgeld') }}>
-              {c / 100} €
+          <div className="geldscheine">
+            {schnellbetraege.map((c) => (
+              <button key={c} disabled={aktion.beschaeftigt} aria-pressed={wahl === c} onClick={() => { waehlen(c); popupZeigen('rueckgeld') }}>
+                {c / 100} €
+              </button>
+            ))}
+          </div>
+          <div className="zahlungsoptionen">
+            <button disabled={aktion.beschaeftigt || !!erfolgsmeldung} onClick={() => void aktion.ausfuehren(() => buchen(bestand.summe, id))}>Passend</button>
+            <button
+              aria-pressed={wahl === 'frei'}
+              disabled={aktion.beschaeftigt}
+              onClick={() => popupZeigen('ziffern')}
+            >
+              Anderer Betrag
             </button>
-          ))}
-          <button
-            aria-pressed={wahl === 'frei'}
-            disabled={aktion.beschaeftigt}
-            onClick={() => popupZeigen('ziffern')}
-          >
-            Anderer Betrag
-          </button>
-          <button disabled={aktion.beschaeftigt} onClick={() => popupZeigen('paypal')}>PayPal</button>
+            <button disabled={aktion.beschaeftigt} onClick={() => popupZeigen('paypal')}>PayPal</button>
+          </div>
         </div>
       )}
       {!popup && <p

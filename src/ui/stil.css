@@ -379,10 +379,14 @@ button.gluehwein-weiss:hover:enabled { background: #e4c268; }
 .produkt > * { position: relative; z-index: 1; }
 .auszahlung { color: var(--auszahlung) !important; }
 .einnahme { color: var(--einnahme) !important; }
-.geldwahl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: .7rem; margin-block: 1rem; }
-.geldwahl > button { min-height: 5rem; font-size: 1.5rem; margin: 0; padding: .7rem; border-width: 2px; }
-.geldwahl > button[aria-pressed='true'] { border-color: var(--fokus); background: var(--hover); box-shadow: inset 0 0 0 2px var(--fokus); }
-.geldwahl > label { grid-column: 1 / -1; }
+.geldwahl { display: grid; gap: .7rem; margin-block: 1rem; }
+.geldscheine, .zahlungsoptionen { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: .7rem; }
+.geldwahl button { min-width: 0; min-height: 5rem; font-size: clamp(1rem, 3vw, 1.5rem); margin: 0; padding: .4rem; border-width: 2px; }
+.geldwahl button[aria-pressed='true'] { border-color: var(--fokus); background: var(--hover); box-shadow: inset 0 0 0 2px var(--fokus); }
+@media (max-width: 40rem) {
+  .geldscheine { gap: .2rem; }
+  .geldscheine button { padding-inline: .1rem; }
+}
 .zahlungs-popup { width: min(36rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); overflow-y: auto; padding: 1.4rem; border: 2px solid var(--rand); border-radius: 1rem; background: var(--flaeche); color: var(--text); box-shadow: 0 1rem 4rem #0006; }
 .zahlungs-popup::backdrop { background: #0009; }
 .ziffern-popup { max-width: 23rem; }
