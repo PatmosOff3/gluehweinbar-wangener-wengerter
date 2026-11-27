@@ -459,6 +459,7 @@ button.gluehwein-weiss:hover:enabled { background: #e4c268; }
 @media (min-width: 48rem) and (orientation: landscape) and (max-height: 40rem) {
   .produkte { row-gap: .3rem; }
   .hauptprodukte { margin-bottom: .4rem; }
-  .hauptprodukte .produkt { min-height: 5.5rem; padding: .4rem .5rem; }
-  .produkte .produkt { min-height: 4.75rem; }
+  .hauptprodukte .produkt { min-height: 5rem; padding: .3rem .5rem; }
+  .produkte .produkt { min-height: 4.5rem; padding-block: .2rem; }
+  .pfandtasten .minus-pfand { padding-block: .2rem; line-height: 1.15; }
 }
